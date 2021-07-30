@@ -112,7 +112,7 @@ class player_class(object):
     def hit(self, damage):
         if self.health - damage <= 0:
             self.health = 0
-            print('YOU - DIED')
+            print('YOU - DIED\nGAME OVER\nWait 1 sec')
             self.is_alive = False
         else:
             self.health -= damage
@@ -158,7 +158,7 @@ class arrow_class(object):
             if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[
                 2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
                 woodman.hit(4)
-                player.hit(2)
+                player.hit(1)
                 arrows.pop(arrows.index(self))
         if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
             self.x += self.speed
@@ -240,7 +240,6 @@ class Enemies(object):
             self.health -= damage
 
     def died(self):
-        print("died")
         woodmans.pop(woodmans.index(self))
         global score
         score += 1

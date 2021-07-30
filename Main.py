@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 pygame.init()
@@ -9,6 +11,11 @@ score = 0
 # спрайт анимации персонажа
 # fds
 background = pygame.image.load(r'Images\Map\Background\bg.jpg')
+music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
+arrowSound = pygame.mixer.Sound(r"Sounds\Arrow\strela_1.mp3")
+arrowHitSound = pygame.mixer.Sound(r"Sounds\Arrow\hit.mp3")
+
+pygame.mixer.music.play(-1)
 
 
 class player_class(object):
@@ -149,7 +156,7 @@ class arrow_class(object):
         self.color = (255, 255, 255)
         self.length = 50
         self.width = 8
-        self.damage = 2
+        self.damage = random.randint(4, 7)
 
     def draw(self, display):
         middle_arrow_x = self.x + self.length // 2
@@ -157,8 +164,8 @@ class arrow_class(object):
         for woodman in woodmans:
             if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[
                 2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
-                woodman.hit(4)
-                player.hit(1)
+                arrowHitSound.play()
+                woodman.hit(self.damage)
                 arrows.pop(arrows.index(self))
         if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
             self.x += self.speed
@@ -188,11 +195,11 @@ class Enemies(object):
     def __init__(self):
         self.width = 112
         self.height = 140
-        self.x = DISPLAY_X_PARAM - self.width - 1
-        self.y = player.y + player.height - self.height  # тут можно настроить уровень на котором спамится моб
+        self.x = DISPLAY_X_PARAM + self.width
+        self.y = DISPLAY_Y_PARAM - self.height - 20
         self.walkCount = 0
         self.direction = -1
-        self.speed = 1
+        self.speed = 3
         self.last_direction = 0
         self.hitbox = (self.x, self.y + 10, 90, 140)
         self.health = 10
@@ -222,14 +229,17 @@ class Enemies(object):
             # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def move(self):
-        if self.x - self.speed > player.x + player.width:
-            self.direction = -1
-            self.last_direction = self.direction
-        elif self.x + self.width + self.speed < player.x:
-            self.direction = 1
-            self.last_direction = self.direction
-        else:
-            self.direction = 0
+        for woodman in woodmans:
+            if woodman != self:
+                if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
+                    self.direction = -1
+                    self.last_direction = self.direction
+                elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
+                    self.direction = 1
+                    self.last_direction = self.direction
+                else:
+                    self.direction = 0
+
         self.x += self.speed * self.direction
 
     def hit(self, damage):
@@ -242,6 +252,8 @@ class Enemies(object):
     def died(self):
         woodmans.pop(woodmans.index(self))
         global score
+        global enemySpawnReload
+        enemySpawnReload = 1
         score += 1
         self.is_alive = False
 
@@ -282,11 +294,11 @@ while run_main_while:
     clock.tick(30)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
     if arrowsReload > 0:
         arrowsReload += 1
-    if arrowsReload == 50:
+    if arrowsReload == 30:
         arrowsReload = 0
     if enemySpawnReload > 0:
         enemySpawnReload += 1
-    if enemySpawnReload == 100:
+    if enemySpawnReload == 50:
         enemySpawnReload = 0
     for event in pygame.event.get():
         # close game
@@ -297,18 +309,15 @@ while run_main_while:
         enemySpawnReload += 1
     # лист со всеми нажатами клавишами
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_r]:  # возврат в стартовое состояние
-        del player  # удаляем экземпляр класса
-        player = player_class(50, DISPLAY_Y_PARAM - 128 - 20)  # создаем новый экземпляр класса
-        pygame.time.delay(1000)  # задержка в 1 секунду
 
     if keys[pygame.K_f]:
         if len(arrows) < 5 and arrowsReload == 0:
+            arrowSound.play()
             if player.rightDirection:
                 direction = 1
             else:
                 direction = -1
-            arrows.append(arrow_class(player.x + player.width / 2, player.y + player.height / 2, direction))
+            arrows.append(arrow_class(player.x + player.width // 2, player.y + player.height // 2 - 15, direction))
             arrowsReload += 1
 
     if keys[pygame.K_c]:

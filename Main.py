@@ -15,7 +15,8 @@ music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
 arrowSound = pygame.mixer.Sound(r"Sounds\Arrow\strela_1.mp3")
 arrowHitSound = pygame.mixer.Sound(r"Sounds\Arrow\hit.mp3")
 
-pygame.mixer.music.play(-1)
+
+# pygame.mixer.music.play(2)
 
 
 class player_class(object):
@@ -191,11 +192,12 @@ class Enemies(object):
                 pygame.image.load(r"Images\Enemies\Drovosek\L5.png"),
                 pygame.image.load(r"Images\Enemies\Drovosek\L6.png")]
     counter_hits = 0
+    enemiesList = []
 
     def __init__(self):
         self.width = 112
         self.height = 140
-        self.x = DISPLAY_X_PARAM + self.width
+        self.x = 900  # DISPLAY_X_PARAM + self.width
         self.y = DISPLAY_Y_PARAM - self.height - 20
         self.walkCount = 0
         self.direction = -1
@@ -204,6 +206,7 @@ class Enemies(object):
         self.hitbox = (self.x, self.y + 10, 90, 140)
         self.health = 10
         self.is_alive = True
+        Enemies.enemiesList.append(self)
 
     def draw(self, display):
         if self.is_alive:
@@ -229,17 +232,34 @@ class Enemies(object):
             # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def move(self):
-        for woodman in woodmans:
-            if woodman != self:
-                if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
-                    self.direction = -1
-                    self.last_direction = self.direction
-                elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
-                    self.direction = 1
-                    self.last_direction = self.direction
-                else:
-                    self.direction = 0
-
+        if len(Enemies.enemiesList) < 2:
+            if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
+                self.direction = -1
+                self.last_direction = self.direction
+            elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
+                self.direction = 1
+                self.last_direction = self.direction
+            else:
+                self.direction = 0
+        else:
+            if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
+                self.direction = -1
+                self.last_direction = self.direction
+                for woodIndex in Enemies.enemiesList:
+                    if woodIndex != self:
+                        if (self.hitbox[0] - self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]) and (
+                                self.hitbox[0] - self.speed > woodIndex.hitbox[0]):
+                            self.direction = 0
+            elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
+                self.direction = 1
+                self.last_direction = self.direction
+                for woodIndex in Enemies.enemiesList:
+                    if woodIndex != self:
+                        if (self.hitbox[0] + self.hitbox[2] + self.speed > woodIndex.hitbox[0]) and (
+                                self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]):
+                            self.direction = 0
+            else:
+                self.direction = 0
         self.x += self.speed * self.direction
 
     def hit(self, damage):
@@ -251,25 +271,31 @@ class Enemies(object):
 
     def died(self):
         woodmans.pop(woodmans.index(self))
+        Enemies.enemiesList.pop(Enemies.enemiesList.index(self))
         global score
         global enemySpawnReload
         enemySpawnReload = 1
         score += 1
         self.is_alive = False
+        self.__del__()
+
+    def __del__(self):
+        pass
 
 
 def draw_game_window():
     global run_main_while
     display.blit(background, (0, 0))  # draw background on display
-    player.draw(display)  # draw player on display
+
     for woodman in woodmans:
         woodman.draw(display)
+    player.draw(display)  # draw player on display
     for arrow in arrows:
         arrow.draw(display)
-    text = font.render("Score: " + str(score), 1, (100, 200, 100))
+    text = font.render("Score: " + str(score), True, (100, 200, 100))
     display.blit(text, (600, 10))
     if not (player.is_alive):
-        text = font.render("YOU DIED", 1, (255, 0, 0))
+        text = font.render("YOU DIED", True, (255, 0, 0))
         display.blit(text, (DISPLAY_X_PARAM // 2, DISPLAY_Y_PARAM // 2))
         pygame.display.update()  # update display
         pygame.time.wait(3000)
@@ -298,7 +324,7 @@ while run_main_while:
         arrowsReload = 0
     if enemySpawnReload > 0:
         enemySpawnReload += 1
-    if enemySpawnReload == 50:
+    if enemySpawnReload == 100:
         enemySpawnReload = 0
     for event in pygame.event.get():
         # close game
@@ -320,9 +346,9 @@ while run_main_while:
             arrows.append(arrow_class(player.x + player.width // 2, player.y + player.height // 2 - 15, direction))
             arrowsReload += 1
 
-    if keys[pygame.K_c]:
-        # приседание
-        player.sit_down()
+    # if keys[pygame.K_c]:
+    #     # приседание
+    #     player.sit_down()
 
     if keys[pygame.K_a] and player.x > 1:
         # бежит влево

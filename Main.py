@@ -16,7 +16,7 @@ arrowSound = pygame.mixer.Sound(r"Sounds\Arrow\strela_1.mp3")
 arrowHitSound = pygame.mixer.Sound(r"Sounds\Arrow\hit.mp3")
 
 
-# pygame.mixer.music.play(2)
+# pygame.mixer.music.play(-1)
 
 
 class player_class(object):
@@ -31,30 +31,26 @@ class player_class(object):
                   pygame.image.load(r"Images\Hero\Health\health_8.png"),
                   pygame.image.load(r"Images\Hero\Health\health_9.png"),
                   pygame.image.load(r"Images\Hero\Health\health_10.png")]
-    heroWalkRight = [pygame.image.load(r'Images\Hero\WalkRight\R1.png'),
-                     pygame.image.load(r'Images\Hero\WalkRight\R2.png'),
-                     pygame.image.load(r'Images\Hero\WalkRight\R3.png'),
-                     pygame.image.load(r'Images\Hero\WalkRight\R4.png'),
-                     pygame.image.load(r'Images\Hero\WalkRight\R5.png'),
-                     pygame.image.load(r'Images\Hero\WalkRight\R6.png')]
-    heroWalkLeft = [pygame.image.load(r'Images\Hero\WalkLeft\L1.png'),
-                    pygame.image.load(r'Images\Hero\WalkLeft\L2.png'),
-                    pygame.image.load(r'Images\Hero\WalkLeft\L3.png'),
-                    pygame.image.load(r'Images\Hero\WalkLeft\L4.png'),
-                    pygame.image.load(r'Images\Hero\WalkLeft\L5.png'),
-                    pygame.image.load(r'Images\Hero\WalkLeft\L6.png')]
-    heroLookRight = pygame.image.load(r'Images\Hero\Stand\SR_1.png')
-    heroLookLeft = pygame.image.load(r'Images\Hero\Stand\SL_1.png')
+    heroArcherRunRight = [pygame.image.load(r'Images\Hero\Archer\runRight\R1.png'),
+                          pygame.image.load(r'Images\Hero\Archer\runRight\R2.png'),
+                          pygame.image.load(r'Images\Hero\Archer\runRight\R3.png'),
+                          pygame.image.load(r'Images\Hero\Archer\runRight\R4.png'),
+                          pygame.image.load(r'Images\Hero\Archer\runRight\R5.png')]
+    heroArcherRunLeft = [pygame.image.load(r'Images\Hero\Archer\runLeft\L1.png'),
+                         pygame.image.load(r'Images\Hero\Archer\runLeft\L2.png'),
+                         pygame.image.load(r'Images\Hero\Archer\runLeft\L3.png'),
+                         pygame.image.load(r'Images\Hero\Archer\runLeft\L4.png'),
+                         pygame.image.load(r'Images\Hero\Archer\runLeft\L5.png')]
 
     def __init__(self, x, y):
         self.x = self.s_x = x
         self.y = self.s_y = y
-        self.width = self.s_width = 128
-        self.height = self.s_height = 128
+        self.width = self.s_width = 96
+        self.height = self.s_height = 96
         self.speed = self.s_speed = 10
         self.jump_power = self.s_jump_power = 10
         self.walkCount = 0  # needed for keys in arrays of images
-        self.hitbox = (self.x + 25, self.y + 18, 76, 111)
+        self.hitbox = (self.x + 25, self.y, 76, 96)
         self.health = 10
         # Состояние персонажа
         self.is_alive = True
@@ -63,24 +59,27 @@ class player_class(object):
         self.leftDirection = False
         self.is_jump = False
         self.is_sit_down = False
+        self.is_archer = True
+        self.is_swordsman = False
+        self.hitCounter = 0
 
     def draw(self, display):
         if self.walkCount + 1 >= 30:
             self.walkCount = 0
         if self.is_run:
             if self.rightDirection:
-                display.blit(self.heroWalkRight[self.walkCount // 5], (self.x, self.y))
+                display.blit(self.heroArcherRunRight[self.walkCount // 6], (self.x, self.y))
                 self.walkCount += 1
             elif self.leftDirection:
-                display.blit(self.heroWalkLeft[self.walkCount // 5], (self.x, self.y))
+                display.blit(self.heroArcherRunLeft[self.walkCount // 6], (self.x, self.y))
                 self.walkCount += 1
         else:
             if self.rightDirection:
-                display.blit(self.heroLookRight, (self.x, self.y))
+                display.blit(self.heroArcherRunRight[0], (self.x, self.y))
             if self.leftDirection:
-                display.blit(self.heroLookLeft, (self.x, self.y))
+                display.blit(self.heroArcherRunLeft[0], (self.x, self.y))
         display.blit(self.heroHealth[self.health], (10, 10))
-        self.hitbox = (self.x + 25, self.y + 18, 76, 111)
+        self.hitbox = (self.x + 5, self.y, 80, 96)
         # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def run_left(self):
@@ -123,6 +122,8 @@ class player_class(object):
             print('YOU - DIED\nGAME OVER\nWait 1 sec')
             self.is_alive = False
         else:
+            self.hitCounter += 1
+            print(self.hitCounter, "\tHIT!")
             self.health -= damage
 
     def jump(self):
@@ -165,9 +166,10 @@ class arrow_class(object):
         for woodman in woodmans:
             if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[
                 2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
-                arrowHitSound.play()
+                # arrowHitSound.play()
                 woodman.hit(self.damage)
                 arrows.pop(arrows.index(self))
+
         if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
             self.x += self.speed
         else:
@@ -179,88 +181,128 @@ class arrow_class(object):
 
 
 class Enemies(object):
-    walkRight = [pygame.image.load(r"Images\Enemies\Drovosek\R1.png"),
-                 pygame.image.load(r"Images\Enemies\Drovosek\R2.png"),
-                 pygame.image.load(r"Images\Enemies\Drovosek\R3.png"),
-                 pygame.image.load(r"Images\Enemies\Drovosek\R4.png"),
-                 pygame.image.load(r"Images\Enemies\Drovosek\R5.png"),
-                 pygame.image.load(r"Images\Enemies\Drovosek\R6.png")]
-    walkLeft = [pygame.image.load(r"Images\Enemies\Drovosek\L1.png"),
-                pygame.image.load(r"Images\Enemies\Drovosek\L2.png"),
-                pygame.image.load(r"Images\Enemies\Drovosek\L3.png"),
-                pygame.image.load(r"Images\Enemies\Drovosek\L4.png"),
-                pygame.image.load(r"Images\Enemies\Drovosek\L5.png"),
-                pygame.image.load(r"Images\Enemies\Drovosek\L6.png")]
-    counter_hits = 0
+    runRight = [pygame.image.load(r"Images\Enemies\Zombie\Run\R1.png"),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R2.png"),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R3.png"),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R4.png")]
+    runLeft = [pygame.image.load(r"Images\Enemies\Zombie\Run\L1.png"),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L2.png"),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L3.png"),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L4.png")]
+    attackRight = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR1.png"),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR2.png"),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR3.png"),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR4.png")]
+    attackLeft = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL1.png"),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL2.png"),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL3.png"),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL4.png")]
     enemiesList = []
 
     def __init__(self):
-        self.width = 112
-        self.height = 140
-        self.x = 900  # DISPLAY_X_PARAM + self.width
+        self.width = 96
+        self.height = 96
+        self.x = DISPLAY_X_PARAM + self.width
         self.y = DISPLAY_Y_PARAM - self.height - 20
         self.walkCount = 0
+        self.attackCount = 0
         self.direction = -1
         self.speed = 3
         self.last_direction = 0
-        self.hitbox = (self.x, self.y + 10, 90, 140)
+        self.hitbox = (self.x + 20, self.y, 65, 95)
         self.health = 10
         self.is_alive = True
+        self.is_attack = False
+        self.damage = 1  # random.randint(1, 2)
+        self.attack_delay = 0
         Enemies.enemiesList.append(self)
 
     def draw(self, display):
         if self.is_alive:
             self.move()
-            if self.walkCount + 1 >= 30:
-                self.walkCount = 0
-            if self.direction == -1:
-                display.blit(self.walkLeft[self.walkCount // 5], (self.x, self.y))
-                self.walkCount += 1
-            elif self.direction == 1:
-                display.blit(self.walkRight[self.walkCount // 5], (self.x, self.y))
-                self.walkCount += 1
-            else:
-                self.walkCount = 0
+
+
+
+            if self.is_attack:
+                if self.attackCount + 1 >= 40:
+                    self.attackCount = 0
+                    self.is_attack = False
+                    self.walkCount = 0
+                if self.attackCount == 20:
+                    player.hit(self.damage)
                 if self.last_direction == -1:
-                    display.blit(self.walkLeft[0], (self.x, self.y))
+                    display.blit(self.attackLeft[self.attackCount // 10], (self.x, self.y))
+                    self.attackCount += 1
+                elif self.last_direction == 1:
+                    display.blit(self.attackRight[self.attackCount // 10], (self.x, self.y))
+                    self.attackCount += 1
+
+            else:
+                if self.walkCount + 1 >= 28:
+                    self.walkCount = 0
+                if self.direction == -1:
+                    display.blit(self.runLeft[self.walkCount // 7], (self.x, self.y))
+                    self.walkCount += 1
+                elif self.direction == 1:
+                    display.blit(self.runRight[self.walkCount // 7], (self.x, self.y))
+                    self.walkCount += 1
+                    # atack animation
                 else:
-                    display.blit(self.walkRight[0], (self.x, self.y))
-            pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
-            pygame.draw.rect(display, (150, 0, 0),
-                             (self.hitbox[0], self.hitbox[1] - 20, 50 - (5 * (10 - self.health)), 10))
-            self.hitbox = (self.x + 20, self.y + 5, 70, 135)
+                    self.walkCount = 0
+                    if self.last_direction == -1:
+                        display.blit(self.runLeft[0], (self.x, self.y))
+                    else:
+                        display.blit(self.runRight[0], (self.x, self.y))
+            pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0] + 6, self.hitbox[1] - 20, 50, 10))
+            pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 6, self.hitbox[1] - 20, 50 - (5 * (10 - self.health)), 10))
+            self.hitbox = (self.x + 20, self.y, 65, 95)
             # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def move(self):
         if len(Enemies.enemiesList) < 2:
             if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
+                self.is_attack = False
                 self.direction = -1
                 self.last_direction = self.direction
             elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
+                self.is_attack = False
                 self.direction = 1
                 self.last_direction = self.direction
             else:
                 self.direction = 0
         else:
             if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
-                self.direction = -1
-                self.last_direction = self.direction
+                self.is_attack = False
+                self.last_direction = self.direction = -1
                 for woodIndex in Enemies.enemiesList:
                     if woodIndex != self:
                         if (self.hitbox[0] - self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]) and (
                                 self.hitbox[0] - self.speed > woodIndex.hitbox[0]):
                             self.direction = 0
             elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
-                self.direction = 1
-                self.last_direction = self.direction
+                self.is_attack = False
+                self.last_direction = self.direction = 1
                 for woodIndex in Enemies.enemiesList:
                     if woodIndex != self:
                         if (self.hitbox[0] + self.hitbox[2] + self.speed > woodIndex.hitbox[0]) and (
-                                self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]):
+                                self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[
+                            2]):
                             self.direction = 0
             else:
                 self.direction = 0
+                # if self.attack_delay < 20:
+                #     self.attack_delay += 1
+                # elif self.attack_delay == 20:
+                #     self.attack_delay = 0
+                self.attack()
         self.x += self.speed * self.direction
+
+    def attack(self):
+        self.is_attack = True
+
+
+
+        # clock.tick(1)
 
     def hit(self, damage):
         if self.health - damage <= 0:
@@ -308,7 +350,7 @@ def draw_game_window():
 font = pygame.font.SysFont("comicsans", 30, True, True)
 run_main_while = True
 clock = pygame.time.Clock()
-player = player_class(50, DISPLAY_Y_PARAM - 128 - 20)
+player = player_class(50, DISPLAY_Y_PARAM - 96 - 20)
 # woodman = Enemies()
 arrows = []
 woodmans = []
@@ -320,7 +362,7 @@ while run_main_while:
     clock.tick(30)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
     if arrowsReload > 0:
         arrowsReload += 1
-    if arrowsReload == 30:
+    if arrowsReload == 20:
         arrowsReload = 0
     if enemySpawnReload > 0:
         enemySpawnReload += 1
@@ -335,16 +377,22 @@ while run_main_while:
         enemySpawnReload += 1
     # лист со всеми нажатами клавишами
     keys = pygame.key.get_pressed()
-
+    if keys[pygame.K_1]:
+        player.is_swordsman = True
+        player.is_archer = False
+    if keys[pygame.K_2]:
+        player.is_archer = True
+        player.is_swordsman = False
     if keys[pygame.K_f]:
-        if len(arrows) < 5 and arrowsReload == 0:
-            arrowSound.play()
-            if player.rightDirection:
-                direction = 1
-            else:
-                direction = -1
-            arrows.append(arrow_class(player.x + player.width // 2, player.y + player.height // 2 - 15, direction))
-            arrowsReload += 1
+        if player.is_archer:
+            if len(arrows) < 3 and arrowsReload == 0:
+                # arrowSound.play()
+                if player.rightDirection:
+                    direction = 1
+                else:
+                    direction = -1
+                arrows.append(arrow_class(player.x + player.width // 2 - 15, player.y + player.height // 2 - 10, direction))
+                arrowsReload += 1
 
     # if keys[pygame.K_c]:
     #     # приседание

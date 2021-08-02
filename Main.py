@@ -3,11 +3,10 @@ import random
 import pygame
 
 pygame.init()
-DISPLAY_Y_PARAM = 768
-DISPLAY_X_PARAM = 1024
+DISPLAY_Y_PARAM = 800
+DISPLAY_X_PARAM = 1100
 display = pygame.display.set_mode((DISPLAY_X_PARAM, DISPLAY_Y_PARAM))
 pygame.display.set_caption("Dungeon Master III")
-score = 0
 background = pygame.image.load(r'Images\Map\Background\bg.jpg')
 music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
 arrowSound = pygame.mixer.Sound(r"Sounds\Arrow\strela_1.mp3")
@@ -48,39 +47,63 @@ class player_class(object):
                             pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L3.png'),
                             pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L4.png'),
                             pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L5.png')]
-    heroSwordsManAttackRight= [pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R1.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R2.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R3.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R4.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R5.png')]
+    heroSwordsManAttackRight = [pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R1.png'),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R2.png'),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R3.png'),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R4.png'),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R5.png')]
     heroSwordsManAttackLeft = [pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L1.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L2.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L3.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L4.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L5.png')]
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L2.png'),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L3.png'),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L4.png'),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L5.png')]
+
     def __init__(self, x, y):
+        # начальное положение
         self.x = self.s_x = x
         self.y = self.s_y = y
+        # ширина/высота модели
         self.width = self.s_width = 96
         self.height = self.s_height = 96
+        # скорость
         self.speed = self.s_speed = 5
+        # сила прыжка
         self.jump_power = self.s_jump_power = 10
-        self.walkCount = 0  # needed for keys in arrays of images
-        self.attackCount = 0
+        # хитбокс персонажа
         self.hitbox = (self.x, self.y, 96, 96)
+        # здоровье
         self.health = 10
-        self.swordDamage = 2
-        # Состояние персонажа
-        self.is_attack_hit = False
+        # урон с меча
+        self.swordDamage = 10
+        # уровень
+        self.arrowsCount = 5
+        self.level = 1
+        self.xp = 43
+        self.needed_xp = 100
+        # --
+        # Состояния персонажа
+        # --
         self.is_alive = True
+        # состояние бега
         self.is_run = False
+        # триггер атаки мечом
         self.is_swordAttack = False
+        # попала ли атака по противнику
+        self.is_attack_hit = False
+        # направление персонажа
         self.rightDirection = True
         self.leftDirection = False
+        # триггер прыжка
         self.is_jump = False
-        self.is_archer = True
-        self.is_swordsman = False
-        self.hitCounter = 0
+        # состояние оружие
+        self.is_archer = False
+        self.is_swordsman = True
+        # счетчики для анимаций
+        self.walkCount = 0
+        self.attackCount = 0
+        # ссылка на объект класса enemies
+        self.whichWoodmanMaybeHit = []
+        self.whichWoodmanHit = None
 
     def draw(self):
         if self.is_archer:
@@ -99,7 +122,6 @@ class player_class(object):
                     self.draw_run(display, self.heroSwordsManRunRight)
                 elif self.leftDirection:
                     self.draw_run(display, self.heroSwordsManRunLeft)
-        display.blit(self.heroHealth[self.health], (10, 10))
         self.hitbox = (self.x, self.y, 96, 96)
         # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
@@ -107,8 +129,12 @@ class player_class(object):
         if self.attackCount + 1 >= 30:
             self.attackCount = 0
             self.is_swordAttack = False
-        # if self.is_attack_hit and self.attackCount ==29:
-            # woodman.hit(self.swordDamage)
+            self.is_attack_hit = False
+            self.whichWoodmanHit = None
+        if self.is_attack_hit and self.attackCount == 28:
+            for woodman in woodmans:
+                if woodman == self.whichWoodmanHit:
+                    woodman.hit(self.swordDamage)
         display.blit(heroAnimation[self.attackCount // 6], (self.x, self.y))
         self.attackCount += 1
 
@@ -129,42 +155,65 @@ class player_class(object):
             self.is_swordAttack = True
             if self.rightDirection:
                 for woodman in woodmans:
-                    if self.hitbox[0] + self.hitbox[2] // 2 <= woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 150 >= woodman.hitbox[0] + woodman.hitbox[2]:
-                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
+                    if self.hitbox[0] <= woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= woodman.hitbox[
+                        0]:
+                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[
+                            3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
                             self.is_attack_hit = True
-                            print("sword attack")
-                            woodman.hit(self.swordDamage)
+                            self.whichWoodmanHit = woodman
             elif self.leftDirection:
                 for woodman in woodmans:
-                    if self.hitbox[0] + self.hitbox[2] // 2 >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - 150 <= woodman.hitbox[0]:
-                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
+                    if self.hitbox[0] + self.hitbox[2] >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[
+                        0] - 80 <= woodman.hitbox[0] + woodman.hitbox[2]:
+                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[
+                            3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
                             self.is_attack_hit = True
-                            print("sword attack")
-                            woodman.hit(self.swordDamage)
+                            self.whichWoodmanHit = woodman
 
     def bow_attack(self):
         global arrowsReload
-        if len(arrows) < 3 and arrowsReload == 0:
+        if player.arrowsCount != 0 and arrowsReload == 0:
             # arrowSound.play()
             if player.rightDirection:
                 direction = 1
             else:
                 direction = -1
-            arrows.append(
-                arrow_class(player.x + player.width // 2 - 15, player.y + player.height // 2 - 10, direction))
+            arrows.append(arrow_class(player.x + player.width // 2 - 15, player.y + player.height // 2 - 16, direction))
             arrowsReload += 1
+            player.arrowsCount -= 1
 
     def run_left(self):
-        self.is_run = True
         self.leftDirection = True
         self.rightDirection = False
-        self.x -= self.speed
+        for woodman in woodmans:
+            if self.hitbox[0] - self.speed <= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] + woodman.hitbox[2] and (
+                    self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
+                    woodman.hitbox[3]):
+                self.x = woodman.hitbox[0] + woodman.hitbox[2] + 1
+                self.stand()
+                return
+            else:
+                self.is_run = True
+        if self.is_run or len(woodmans)==0:
+            self.x -= self.speed
+            self.is_run = True
 
     def run_right(self):
-        self.is_run = True
+
         self.rightDirection = True
         self.leftDirection = False
-        self.x += self.speed
+        for woodman in woodmans:
+            if self.hitbox[0] + self.hitbox[2] + self.speed >= woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[
+                0] and (self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
+                        woodman.hitbox[3]):
+                self.x = woodman.hitbox[0] - self.width - 1
+                self.stand()
+                return
+            else:
+                self.is_run = True
+        if self.is_run or len(woodmans)==0:
+            self.x += self.speed
+            self.is_run = True
 
     def stand(self):
         self.is_run = False
@@ -182,30 +231,59 @@ class player_class(object):
             print('YOU - DIED\nGAME OVER\nWait 1 sec')
             self.is_alive = False
         else:
-            self.hitCounter += 1
-            print(self.hitCounter, "\tHIT!")
             self.health -= damage
 
-    def jump(self):
+    def jump_up(self):
         if self.jump_power > 0:  # летит вверх
-            if self.y - (self.jump_power ** 2) / 2 >= 0:  # другие условия удара можно добавить!
-                self.y -= (self.jump_power ** 2) / 2
-                self.jump_power -= 0.6  # 1
-            else:  # ударился в потолок
+            for woodman in woodmans:
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < woodman.hitbox[1] + woodman.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > woodman.hitbox[1]) and ((self.hitbox[0] > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] < woodman.hitbox[ 0] + woodman.hitbox[2])):
+                    self.y = woodman.hitbox[1] + woodman.hitbox[3] + 1
+                    self.jump_power = 0
+                    self.jump_down()
+                    return
+            if self.hitbox[1] - self.jump_power ** 2 // 2 < 0:  # другие условия удара можно добавить!
                 self.y = 0  # типа стукнулся головой
                 self.jump_power = 0
-                # k, jump_power = jump_power, 0
+                self.jump_down()
+                return
+            else:
+                self.y -= (self.jump_power ** 2) // 2
+                self.jump_power -= 1  # 1
+        else:
+            self.jump_down()
         # летит вниз
-        elif self.jump_power <= 0:
-            if self.y + (self.jump_power ** 2) / 2 < DISPLAY_Y_PARAM - self.height - 20:
-                self.y += (self.jump_power ** 2) / 2
-                self.jump_power -= 1
-            else:  # ударился об пол
-                self.y = DISPLAY_Y_PARAM - self.height - 20  # типа стукнулся ногами
+
+    def jump_down(self):
+        for woodman in woodmans:
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < woodman.hitbox[1] + woodman.hitbox[3]) and ((self.hitbox[0] > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] < woodman.hitbox[0] + woodman.hitbox[2])):
+                self.y = woodman.hitbox[1] - self.height - 1
                 self.is_jump = False
                 self.speed = self.s_speed
                 self.jump_power = self.s_jump_power
+                return
+        if self.hitbox[1] + self.hitbox[3] + (self.jump_power ** 2) // 2 < DISPLAY_Y_PARAM - 20:
+            self.y += (self.jump_power ** 2) // 2
+            self.jump_power -= 1
+        else:  # ударился об пол
+            self.y = DISPLAY_Y_PARAM - self.height - 50  # типа стукнулся ногами
+            self.is_jump = False
+            self.speed = self.s_speed
+            self.jump_power = self.s_jump_power
 
+    def loot(self, xp):
+        self.xp += xp
+        if self.xp >= self.needed_xp:
+            self.levelup()
+
+    def levelup(self):
+        self.xp = self.xp - self.needed_xp
+        self.needed_xp *= 1.2
+        self.level += 1
+        if self.health + 3 > 10:
+            self.health = 10
+        else:
+            self.health += 3
+        self.arrowsCount += 5
 
 class arrow_class(object):
     arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png")
@@ -216,7 +294,6 @@ class arrow_class(object):
         self.y = y
         self.direction = direction
         self.speed = 10 * direction
-        self.color = (255, 255, 255)
         self.length = 50
         self.width = 8
         self.damage = random.randint(4, 7)
@@ -264,31 +341,37 @@ class Enemies(object):
     def __init__(self):
         self.width = 96
         self.height = 96
-        self.x = DISPLAY_X_PARAM + self.width
-        self.y = DISPLAY_Y_PARAM - self.height - 20
+        self.x = 0 - self.width  # DISPLAY_X_PARAM + self.width
+        self.y = DISPLAY_Y_PARAM - self.height - 50
         self.walkCount = 0
         self.attackCount = 0
         self.direction = -1
         self.speed = 1
+        self.xp = 10
         self.last_direction = 0
         self.hitbox = (self.x + 3, self.y, 85, 96)
         self.health = 10
         self.is_alive = True
         self.is_attack = False
-        self.damage = 0  # random.randint(1, 2)
+        self.damage = 1
         self.attack_delay = 0
         Enemies.enemiesList.append(self)
 
     def draw(self, display):
         if self.is_alive:
             self.move()
-            if self.is_attack:
+            if self.attack_delay + 1 >= 75:
+                self.attack_delay = 0
+            if self.attack_delay > 0:
+                self.attack_delay += 1
+            if self.is_attack and self.attack_delay == 0:
                 if self.attackCount + 1 >= 40:
                     self.attackCount = 0
                     self.is_attack = False
                     self.walkCount = 0
                 if self.attackCount == 38:
                     player.hit(self.damage)
+                    self.attack_delay += 1
                 if self.last_direction == -1:
                     display.blit(self.attackLeft[self.attackCount // 10], (self.x, self.y))
                     self.attackCount += 1
@@ -314,11 +397,10 @@ class Enemies(object):
                         display.blit(self.runRight[0], (self.x, self.y))
             # health bar
             pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0] + 25, self.hitbox[1] - 15, 50, 10))
-            pygame.draw.rect(display, (138, 3, 3),
-                             (self.hitbox[0] + 25, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
+            pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 25, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
             self.hitbox = (self.x + 3, self.y, 85, 96)
             # draw hitbox
-            # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
+            # pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
 
     def move(self):
         if len(Enemies.enemiesList) < 2:
@@ -346,9 +428,7 @@ class Enemies(object):
                 self.last_direction = self.direction = 1
                 for woodIndex in Enemies.enemiesList:
                     if woodIndex != self:
-                        if (self.hitbox[0] + self.hitbox[2] + self.speed > woodIndex.hitbox[0]) and (
-                                self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[
-                            2]):
+                        if (self.hitbox[0] + self.hitbox[2] + self.speed > woodIndex.hitbox[0]) and (self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]):
                             self.direction = 0
             else:
                 self.direction = 0
@@ -372,11 +452,13 @@ class Enemies(object):
         self.is_alive = False
         woodmans.pop(woodmans.index(self))
         Enemies.enemiesList.pop(Enemies.enemiesList.index(self))
-        global score
         global enemySpawnReload
         enemySpawnReload = 1
-        score += 1
+        player.loot(self.xp)
 
+
+class Objects(object):
+    pass
 
 def draw_game_window():
     global run_main_while
@@ -386,21 +468,31 @@ def draw_game_window():
     player.draw()  # draw player on display
     for arrow in arrows:
         arrow.draw(display)
-    text = font.render("Score: " + str(score), True, (100, 200, 100))
-    display.blit(text, (600, 10))
+    lvl = font.render("Level " + str(player.level), True, (255,215,0))
     if not (player.is_alive):
-        text = font.render("YOU DIED", True, (255, 0, 0))
-        display.blit(text, (DISPLAY_X_PARAM // 2, DISPLAY_Y_PARAM // 2))
+        fontDie = pygame.font.SysFont("arial", 60, True, True)
+        textDie = fontDie.render("YOU DIED", True, (60, 0, 0))
+        display.blit(textDie, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM // 2))
         pygame.display.update()  # update display
         pygame.time.wait(3000)
         run_main_while = False
-    pygame.display.update()  # update display
+    pygame.draw.rect(display, (35, 20, 35), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
+    display.blit(player.heroHealth[player.health], (15, DISPLAY_Y_PARAM - 45))
+    pygame.draw.rect(display, (100, 100, 100), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30), 5))
+    pygame.draw.rect(display, (255, 215, 0), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30) * float(player.xp / player.needed_xp), 5))
+    display.blit(lvl, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM - 40))
+    if player.arrowsCount > 0:
+        display.blit(font.render(str(player.arrowsCount), True, (255,255,255)), (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
+    else:
+        display.blit(font.render(str(player.arrowsCount), True, (255, 0, 0)), (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
+    display.blit(arrow_class.arrowRightDirection, (DISPLAY_X_PARAM - 65, DISPLAY_Y_PARAM - 30))
+    pygame.display.update()
 
 
-font = pygame.font.SysFont("comicsans", 30, True, True)
+font = pygame.font.SysFont("arial", 20, True, True)
 run_main_while = True
 clock = pygame.time.Clock()
-player = player_class(50, DISPLAY_Y_PARAM - 96 - 70)
+player = player_class(50, DISPLAY_Y_PARAM - 96 - 50)  # DISPLAY_Y_PARAM - 96 - 20
 arrows = []
 woodmans = []
 arrowsReload = 0
@@ -452,7 +544,7 @@ while run_main_while:
         player.stand()
     if player.is_jump:
         # прыжок
-        player.jump()
+        player.jump_up()
     else:
         if keys[pygame.K_SPACE]:
             # подготовка к прыжку

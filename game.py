@@ -162,8 +162,7 @@ class player_class(object):
             elif self.leftDirection:
                 for woodman in woodmans:
                     if self.hitbox[0] + self.hitbox[2] >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - 80 <= woodman.hitbox[0] + woodman.hitbox[2]:
-                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[
-                            3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
+                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > woodman.hitbox[1] and self.hitbox[1] + self.height // 2 < woodman.hitbox[1] + woodman.hitbox[3]:
                             self.is_attack_hit = True
                             self.whichWoodmanHit = woodman
 
@@ -427,8 +426,7 @@ class Enemies(object):
             else:
                 self.direction = 0
                 # атакует если он по y +- рядом
-                if player.hitbox[1] + player.hitbox[3] - self.height * 0.75 <= self.hitbox[1] + self.hitbox[3] and \
-                        player.hitbox[1] + self.height * 0.75 >= self.hitbox[1]:
+                if player.hitbox[1] + player.hitbox[3] - self.height // 2  > self.hitbox[1] and player.hitbox[1] + self.height // 2 < self.hitbox[1] + self.hitbox[3]:
                     self.attack()
         self.x += self.speed * self.direction
 

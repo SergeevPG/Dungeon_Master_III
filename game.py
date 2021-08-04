@@ -74,7 +74,7 @@ class player_class(object):
         self.minSwordDamage = 5
         self.maxSwordDamage = 8
         # уровень
-        self.arrowsCount = 500
+        self.arrowsCount = 69
         self.level = 1
         self.maxLevel = 5
         self.xp = 0
@@ -94,6 +94,7 @@ class player_class(object):
         self.leftDirection = False
         # триггер прыжка
         self.is_jump = False
+        self.stand_on_enemy = False
         # состояние оружие
         self.is_archer = False
         self.is_swordsman = True
@@ -134,7 +135,6 @@ class player_class(object):
             for woodman in woodmans:
                 if woodman == self.whichWoodmanHit:
                     woodman.hit(random.randint(self.minSwordDamage, self.maxSwordDamage))
-                    print(woodman.health)
         display.blit(heroAnimation[self.attackCount // 6], (self.x, self.y))
         self.attackCount += 1
 
@@ -182,6 +182,8 @@ class player_class(object):
     def run_left(self):
         self.leftDirection = True
         self.rightDirection = False
+        self.is_run = True
+        # упор в противника
         for woodman in woodmans:
             if self.hitbox[0] - self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] + woodman.hitbox[2] and (
                     self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
@@ -189,15 +191,26 @@ class player_class(object):
                 self.x = woodman.hitbox[0] + woodman.hitbox[2] + 1
                 self.stand()
                 return
-            else:
-                self.is_run = True
-        if self.is_run or len(woodmans)==0:
+        if self.stand_on_enemy:
+            k = 0
+            for woodman in woodmans:
+                if (self.hitbox[0] + self.hitbox[2] - self.speed > woodman.hitbox[0] and  self.hitbox[0] + self.hitbox[2]- self.speed < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] - self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - self.speed> woodman.hitbox[0]):
+                    k += 1
+                    break
+            if k == 0:
+                self.jump_power = 0
+                self.stand_on_enemy = False
+                self.pre_jump()
+                self.jump_down()
+                self.stand()
+                return
+        if self.is_run or len(woodmans) == 0:
             self.x -= self.speed
-            self.is_run = True
 
     def run_right(self):
         self.rightDirection = True
         self.leftDirection = False
+        self.is_run = True
         for woodman in woodmans:
             if self.hitbox[0] + self.hitbox[2] + self.speed > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[
                 0] and (self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
@@ -205,11 +218,21 @@ class player_class(object):
                 self.x = woodman.hitbox[0] - self.width - 1
                 self.stand()
                 return
-            else:
-                self.is_run = True
+        if self.stand_on_enemy:
+            k = 0
+            for woodman in woodmans:
+                if (self.hitbox[0] + self.hitbox[2] + self.speed > woodman.hitbox[0] and  self.hitbox[0] + self.hitbox[2] + self.speed < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.speed > woodman.hitbox[0]):
+                    k += 1
+                    break
+            if k == 0:
+                self.jump_power = 0
+                self.stand_on_enemy = False
+                self.pre_jump()
+                self.jump_down()
+                self.stand()
+                return
         if self.is_run or len(woodmans)==0:
             self.x += self.speed
-            self.is_run = True
 
     def stand(self):
         self.is_run = False
@@ -254,14 +277,16 @@ class player_class(object):
             if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < woodman.hitbox[1] + woodman.hitbox[3]) and ((self.hitbox[0] > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] < woodman.hitbox[0] + woodman.hitbox[2])):
                 self.y = woodman.hitbox[1] - self.height - 1
                 self.is_jump = False
+                self.stand_on_enemy = True
                 self.speed = self.s_speed
                 self.jump_power = self.s_jump_power
                 return
         if self.hitbox[1] + self.hitbox[3] + (self.jump_power ** 2) // 2 < DISPLAY_Y_PARAM - 20:
+            # летит вниз
             self.y += (self.jump_power ** 2) // 2
             self.jump_power -= 1
         else:  # ударился об пол
-            self.y = DISPLAY_Y_PARAM - self.height - 50  # типа стукнулся ногами
+            self.y = DISPLAY_Y_PARAM - self.height - 50
             self.is_jump = False
             self.speed = self.s_speed
             self.jump_power = self.s_jump_power
@@ -315,7 +340,7 @@ class Enemies(object):
         self.walkCount = 0
         self.attackCount = 0
         self.direction = -1
-        self.speed = 1
+        self.speed = 2
         self.xp = 55
         self.last_direction = 0
         self.hitbox = (self.x + 3, self.y, 85, 96)
@@ -365,8 +390,8 @@ class Enemies(object):
                     else:
                         display.blit(self.runRight[0], (self.x, self.y))
             # health bar
-            pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0] + 25, self.hitbox[1] - 15, 50, 10))
-            pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 25, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
+            pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50, 10))
+            pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
             self.hitbox = (self.x + 3, self.y, 85, 96)
             # draw hitbox
             # pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)

@@ -1,7 +1,5 @@
 import random
-
 import pygame
-
 pygame.init()
 DISPLAY_Y_PARAM = 800
 DISPLAY_X_PARAM = 1100
@@ -9,8 +7,7 @@ display = pygame.display.set_mode((DISPLAY_X_PARAM, DISPLAY_Y_PARAM))
 pygame.display.set_caption("Dungeon Master III")
 background = pygame.image.load(r'Images\Map\Background\bg.jpg')
 music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
-arrowSound = pygame.mixer.Sound(r"Sounds\Arrow\strela_1.mp3")
-arrowHitSound = pygame.mixer.Sound(r"Sounds\Arrow\hit.mp3")
+
 
 
 # pygame.mixer.music.play(-1)
@@ -74,11 +71,13 @@ class player_class(object):
         # здоровье
         self.health = 10
         # урон с меча
-        self.swordDamage = 10
+        self.minSwordDamage = 5
+        self.maxSwordDamage = 8
         # уровень
-        self.arrowsCount = 5
+        self.arrowsCount = 500
         self.level = 1
-        self.xp = 43
+        self.maxLevel = 5
+        self.xp = 0
         self.needed_xp = 100
         # --
         # Состояния персонажа
@@ -134,7 +133,8 @@ class player_class(object):
         if self.is_attack_hit and self.attackCount == 28:
             for woodman in woodmans:
                 if woodman == self.whichWoodmanHit:
-                    woodman.hit(self.swordDamage)
+                    woodman.hit(random.randint(self.minSwordDamage, self.maxSwordDamage))
+                    print(woodman.health)
         display.blit(heroAnimation[self.attackCount // 6], (self.x, self.y))
         self.attackCount += 1
 
@@ -155,16 +155,13 @@ class player_class(object):
             self.is_swordAttack = True
             if self.rightDirection:
                 for woodman in woodmans:
-                    if self.hitbox[0] <= woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= woodman.hitbox[
-                        0]:
-                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[
-                            3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
+                    if self.hitbox[0] <= woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= woodman.hitbox[0]:
+                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
                             self.is_attack_hit = True
                             self.whichWoodmanHit = woodman
             elif self.leftDirection:
                 for woodman in woodmans:
-                    if self.hitbox[0] + self.hitbox[2] >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[
-                        0] - 80 <= woodman.hitbox[0] + woodman.hitbox[2]:
+                    if self.hitbox[0] + self.hitbox[2] >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - 80 <= woodman.hitbox[0] + woodman.hitbox[2]:
                         if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[
                             3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
                             self.is_attack_hit = True
@@ -172,21 +169,21 @@ class player_class(object):
 
     def bow_attack(self):
         global arrowsReload
-        if player.arrowsCount != 0 and arrowsReload == 0:
+        if self.arrowsCount != 0 and arrowsReload == 0:
             # arrowSound.play()
-            if player.rightDirection:
+            if self.rightDirection:
                 direction = 1
             else:
                 direction = -1
-            arrows.append(arrow_class(player.x + player.width // 2 - 15, player.y + player.height // 2 - 16, direction))
+            arrowList.append(arrow_class(self.x + self.width // 2 - 15, self.y + self.height // 2 - 16, direction))
             arrowsReload += 1
-            player.arrowsCount -= 1
+            self.arrowsCount -= 1
 
     def run_left(self):
         self.leftDirection = True
         self.rightDirection = False
         for woodman in woodmans:
-            if self.hitbox[0] - self.speed <= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] + woodman.hitbox[2] and (
+            if self.hitbox[0] - self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] + woodman.hitbox[2] and (
                     self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
                     woodman.hitbox[3]):
                 self.x = woodman.hitbox[0] + woodman.hitbox[2] + 1
@@ -199,11 +196,10 @@ class player_class(object):
             self.is_run = True
 
     def run_right(self):
-
         self.rightDirection = True
         self.leftDirection = False
         for woodman in woodmans:
-            if self.hitbox[0] + self.hitbox[2] + self.speed >= woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[
+            if self.hitbox[0] + self.hitbox[2] + self.speed > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[
                 0] and (self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
                         woodman.hitbox[3]):
                 self.x = woodman.hitbox[0] - self.width - 1
@@ -271,52 +267,25 @@ class player_class(object):
             self.jump_power = self.s_jump_power
 
     def loot(self, xp):
-        self.xp += xp
-        if self.xp >= self.needed_xp:
-            self.levelup()
+        if self.level + 1 <= self.maxLevel:
+            self.xp += xp
+            if self.xp >= self.needed_xp:
+                self.levelup()
 
     def levelup(self):
-        self.xp = self.xp - self.needed_xp
-        self.needed_xp *= 1.2
         self.level += 1
+        if self.level == self.maxLevel:
+            self.xp = self.needed_xp
+        else:
+            self.xp = self.xp - self.needed_xp
+            self.needed_xp *= 1.2
+        self.minSwordDamage += 1
+        self.maxSwordDamage += 1
         if self.health + 3 > 10:
             self.health = 10
         else:
             self.health += 3
         self.arrowsCount += 5
-
-class arrow_class(object):
-    arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png")
-    arrowRightDirection = pygame.image.load(r"Images\Arrows\arrow_r.png")
-
-    def __init__(self, x, y, direction):
-        self.x = x
-        self.y = y
-        self.direction = direction
-        self.speed = 10 * direction
-        self.length = 50
-        self.width = 8
-        self.damage = random.randint(4, 7)
-
-    def draw(self, display):
-        middle_arrow_x = self.x + self.length // 2
-        middle_arrow_y = self.y + self.width // 2
-        for woodman in woodmans:
-            if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[
-                2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
-                # arrowHitSound.play()
-                woodman.hit(self.damage)
-                arrows.pop(arrows.index(self))
-                return
-        if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
-            self.x += self.speed
-        else:
-            arrows.pop(arrows.index(self))
-            return
-        if self.direction == 1:
-            display.blit(self.arrowRightDirection, (self.x, self.y))
-        else:
-            display.blit(self.arrowLeftDirection, (self.x, self.y))
 
 
 class Enemies(object):
@@ -347,7 +316,7 @@ class Enemies(object):
         self.attackCount = 0
         self.direction = -1
         self.speed = 1
-        self.xp = 10
+        self.xp = 55
         self.last_direction = 0
         self.hitbox = (self.x + 3, self.y, 85, 96)
         self.health = 10
@@ -456,6 +425,37 @@ class Enemies(object):
         enemySpawnReload = 1
         player.loot(self.xp)
 
+class arrow_class(object):
+    arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png")
+    arrowRightDirection = pygame.image.load(r"Images\Arrows\arrow_r.png")
+    def __init__(self, x, y, direction):
+        self.x = x
+        self.y = y
+        self.direction = direction
+        self.speed = 10 * direction
+        self.length = 50
+        self.width = 8
+        self.damage = random.randint(4, 7)
+
+    def draw(self, display):
+        middle_arrow_x = self.x + self.length // 2
+        middle_arrow_y = self.y + self.width // 2
+        for woodman in woodmans:
+            if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
+                # arrowHitSound.play()
+                woodman.hit(self.damage)
+                arrowList.pop(arrowList.index(self))
+                return
+        if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
+            self.x += self.speed
+        else:
+            arrowList.pop(arrowList.index(self))
+            return
+        if self.direction == 1:
+            display.blit(self.arrowRightDirection, (self.x, self.y))
+        else:
+            display.blit(self.arrowLeftDirection, (self.x, self.y))
+
 
 class Objects(object):
     pass
@@ -466,9 +466,10 @@ def draw_game_window():
     for woodman in woodmans:
         woodman.draw(display)
     player.draw()  # draw player on display
-    for arrow in arrows:
+
+    for arrow in arrowList:
         arrow.draw(display)
-    lvl = font.render("Level " + str(player.level), True, (255,215,0))
+
     if not (player.is_alive):
         fontDie = pygame.font.SysFont("arial", 60, True, True)
         textDie = fontDie.render("YOU DIED", True, (60, 0, 0))
@@ -476,39 +477,52 @@ def draw_game_window():
         pygame.display.update()  # update display
         pygame.time.wait(3000)
         run_main_while = False
-    pygame.draw.rect(display, (35, 20, 35), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
-    display.blit(player.heroHealth[player.health], (15, DISPLAY_Y_PARAM - 45))
-    pygame.draw.rect(display, (100, 100, 100), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30), 5))
-    pygame.draw.rect(display, (255, 215, 0), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30) * float(player.xp / player.needed_xp), 5))
-    display.blit(lvl, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM - 40))
-    if player.arrowsCount > 0:
-        display.blit(font.render(str(player.arrowsCount), True, (255,255,255)), (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
-    else:
-        display.blit(font.render(str(player.arrowsCount), True, (255, 0, 0)), (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
-    display.blit(arrow_class.arrowRightDirection, (DISPLAY_X_PARAM - 65, DISPLAY_Y_PARAM - 30))
+    draw_UI()
     pygame.display.update()
+
+def draw_UI():
+    # backgroud UI
+    pygame.draw.rect(display, (35, 20, 35), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
+    # health bar
+    display.blit(player.heroHealth[player.health], (15, DISPLAY_Y_PARAM - 45))
+    # xp bar
+    pygame.draw.rect(display, (100, 100, 100), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30), 5))
+    pygame.draw.rect(display, (255, 215, 0),(15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30) * float(player.xp / player.needed_xp), 5))
+    # text Level 1...5
+    lvl = font.render("Level " + str(player.level), True, (255,215,0))
+    display.blit(lvl, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM - 40))
+    # count arrows which allowed
+    if player.arrowsCount > 0:
+        display.blit(font.render(str(player.arrowsCount), True, (255, 255, 255)),
+                     (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
+    else:
+        display.blit(font.render(str(player.arrowsCount), True, (255, 0, 0)),
+                     (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
+    display.blit(arrow_class.arrowRightDirection, (DISPLAY_X_PARAM - 65, DISPLAY_Y_PARAM - 30))
 
 
 font = pygame.font.SysFont("arial", 20, True, True)
 run_main_while = True
 clock = pygame.time.Clock()
 player = player_class(50, DISPLAY_Y_PARAM - 96 - 50)  # DISPLAY_Y_PARAM - 96 - 20
-arrows = []
 woodmans = []
-arrowsReload = 0
+arrowList = []
 swordReload = 0
+arrowsReload = 0
 enemySpawnReload = 0
 # MAIN LOOP
 while run_main_while:
     clock.tick(60)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
-    if arrowsReload > 0:
-        arrowsReload += 1
-    if arrowsReload >= 40:
-        arrowsReload = 0
     if swordReload > 0:
         swordReload += 1
     if swordReload >= 40:
         swordReload = 0
+
+    if arrowsReload > 0:
+        arrowsReload += 1
+    if arrowsReload >= 40:
+        arrowsReload = 0
+
     if enemySpawnReload > 0:
         enemySpawnReload += 1
     if enemySpawnReload == 100:

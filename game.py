@@ -102,8 +102,8 @@ class player_class(object):
         self.walkCount = 0
         self.attackCount = 0
         # ссылка на объект класса enemies
-        self.whichWoodmanMaybeHit = []
-        self.whichWoodmanHit = None
+        self.whichZombieMaybeHit = []
+        self.whichZombieHit = None
 
     def draw(self):
         if self.is_archer:
@@ -123,18 +123,18 @@ class player_class(object):
                 elif self.leftDirection:
                     self.draw_run(display, self.heroSwordsManRunLeft)
         self.hitbox = (self.x, self.y, 96, 96)
-        # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
+        pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def draw_attackAnimation(self, display, heroAnimation):
         if self.attackCount + 1 >= 30:
             self.attackCount = 0
             self.is_swordAttack = False
             self.is_attack_hit = False
-            self.whichWoodmanHit = None
+            self.whichZombieHit = None
         if self.is_attack_hit and self.attackCount == 28:
-            for woodman in woodmans:
-                if woodman == self.whichWoodmanHit:
-                    woodman.hit(random.randint(self.minSwordDamage, self.maxSwordDamage))
+            for zombie in zombies:
+                if zombie == self.whichZombieHit:
+                    zombie.hit(random.randint(self.minSwordDamage, self.maxSwordDamage))
         display.blit(heroAnimation[self.attackCount // 6], (self.x, self.y))
         self.attackCount += 1
 
@@ -154,17 +154,17 @@ class player_class(object):
             swordReload += 1
             self.is_swordAttack = True
             if self.rightDirection:
-                for woodman in woodmans:
-                    if self.hitbox[0] <= woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= woodman.hitbox[0]:
-                        if self.hitbox[1] - self.height // 2 <= woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.height // 2 >= woodman.hitbox[1] + woodman.hitbox[3]:
+                for zombie in zombies:
+                    if self.hitbox[0] <= zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= zombie.hitbox[0]:
+                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
                             self.is_attack_hit = True
-                            self.whichWoodmanHit = woodman
+                            self.whichZombieHit = zombie
             elif self.leftDirection:
-                for woodman in woodmans:
-                    if self.hitbox[0] + self.hitbox[2] >= woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - 80 <= woodman.hitbox[0] + woodman.hitbox[2]:
-                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > woodman.hitbox[1] and self.hitbox[1] + self.height // 2 < woodman.hitbox[1] + woodman.hitbox[3]:
+                for zombie in zombies:
+                    if self.hitbox[0] + self.hitbox[2] >= zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - 80 <= zombie.hitbox[0] + zombie.hitbox[2]:
+                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
                             self.is_attack_hit = True
-                            self.whichWoodmanHit = woodman
+                            self.whichZombieHit = zombie
 
     def bow_attack(self):
         global arrowsReload
@@ -183,19 +183,25 @@ class player_class(object):
         self.rightDirection = False
         self.is_run = True
         # упор в противника
-        for woodman in woodmans:
-            if self.hitbox[0] - self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] + woodman.hitbox[2] and (
-                    self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
-                    woodman.hitbox[3]):
-                self.x = woodman.hitbox[0] + woodman.hitbox[2] + 1
+        for zombie in zombies:
+            if self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] + zombie.hitbox[2] and (
+                    self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] + zombie.hitbox[3]):
+                self.x = zombie.hitbox[0] + zombie.hitbox[2] + 1
                 self.stand()
                 return
+        """
+            сверяет находится ли 3 точки игрока по Х внутри хитбокса противника по Х
+            сверяет крайнюю левую, правую и центральную
+        """
         if self.stand_on_enemy:
             k = 0
-            for woodman in woodmans:
-                if (self.hitbox[0] + self.hitbox[2] - self.speed > woodman.hitbox[0] and  self.hitbox[0] + self.hitbox[2]- self.speed < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] - self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] - self.speed> woodman.hitbox[0]):
-                    k += 1
+            for zombie in zombies:
+                if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]-self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]-self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2-self.speed>zombie.hitbox[0]):
+                    k +=1
                     break
+                # if (self.hitbox[0] + self.hitbox[2] - self.speed > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]- self.speed < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - self.speed> zombie.hitbox[0]):
+                #     k += 1
+                #     break
             if k == 0:
                 self.jump_power = 0
                 self.stand_on_enemy = False
@@ -203,26 +209,33 @@ class player_class(object):
                 self.jump_down()
                 self.stand()
                 return
-        if self.is_run or len(woodmans) == 0:
+        if self.is_run or len(zombies) == 0:
             self.x -= self.speed
 
     def run_right(self):
         self.rightDirection = True
         self.leftDirection = False
         self.is_run = True
-        for woodman in woodmans:
-            if self.hitbox[0] + self.hitbox[2] + self.speed > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[
-                0] and (self.hitbox[1] + self.hitbox[3] > woodman.hitbox[1] and self.hitbox[1] < woodman.hitbox[1] +
-                        woodman.hitbox[3]):
-                self.x = woodman.hitbox[0] - self.width - 1
+        for zombie in zombies:
+            if self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[
+                0] and (self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
+                        zombie.hitbox[3]):
+                self.x = zombie.hitbox[0] - self.hitbox[3] - 1
                 self.stand()
                 return
+        """
+            сверяет находится ли 3 точки игрока по Х внутри хитбокса противника по Х
+            сверяет крайнюю левую, правую и центральную
+        """
         if self.stand_on_enemy:
             k = 0
-            for woodman in woodmans:
-                if (self.hitbox[0] + self.hitbox[2] + self.speed > woodman.hitbox[0] and  self.hitbox[0] + self.hitbox[2] + self.speed < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.speed < woodman.hitbox[0] + woodman.hitbox[2] and self.hitbox[0] + self.speed > woodman.hitbox[0]):
-                    k += 1
+            for zombie in zombies:
+                if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+ self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]+ self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2+ self.speed>zombie.hitbox[0]):
+                    k +=1
                     break
+                # if (self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and  self.hitbox[0] + self.hitbox[2] + self.speed < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] + self.speed > zombie.hitbox[0]):
+                #     k += 1
+                #     break
             if k == 0:
                 self.jump_power = 0
                 self.stand_on_enemy = False
@@ -230,7 +243,8 @@ class player_class(object):
                 self.jump_down()
                 self.stand()
                 return
-        if self.is_run or len(woodmans)==0:
+            k=0
+        if self.is_run or len(zombies)==0:
             self.x += self.speed
 
     def stand(self):
@@ -253,9 +267,15 @@ class player_class(object):
 
     def jump_up(self):
         if self.jump_power > 0:  # летит вверх
-            for woodman in woodmans:
-                if (self.hitbox[1] - self.jump_power ** 2 // 2 < woodman.hitbox[1] + woodman.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > woodman.hitbox[1]) and ((self.hitbox[0] > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] < woodman.hitbox[ 0] + woodman.hitbox[2])):
-                    self.y = woodman.hitbox[1] + woodman.hitbox[3] + 1
+            for zombie in zombies:
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > zombie.hitbox[1]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[ 0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2]//2 > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < zombie.hitbox[0] + zombie.hitbox[2])):
+                    self.y = zombie.hitbox[1] + zombie.hitbox[3] + 1
+                    self.jump_power = 0
+                    self.jump_down()
+                    return
+            for ObjectOnMap in listObjectsOnMap:
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])):
+                    self.y = ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] + 1
                     self.jump_power = 0
                     self.jump_down()
                     return
@@ -272,23 +292,30 @@ class player_class(object):
         # летит вниз
 
     def jump_down(self):
-        for woodman in woodmans:
-            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > woodman.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < woodman.hitbox[1] + woodman.hitbox[3]) and ((self.hitbox[0] > woodman.hitbox[0] and self.hitbox[0] < woodman.hitbox[0] + woodman.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > woodman.hitbox[0] and self.hitbox[0] + self.hitbox[2] < woodman.hitbox[0] + woodman.hitbox[2])):
-                self.y = woodman.hitbox[1] - self.height - 1
+        for zombie in zombies:
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > zombie.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[0] + zombie.hitbox[2])):
+                self.y = zombie.hitbox[1] - self.height - 1
                 self.is_jump = False
                 self.stand_on_enemy = True
                 self.speed = self.s_speed
                 self.jump_power = self.s_jump_power
                 return
-        if self.hitbox[1] + self.hitbox[3] + (self.jump_power ** 2) // 2 < DISPLAY_Y_PARAM - 20:
-            # летит вниз
-            self.y += (self.jump_power ** 2) // 2
-            self.jump_power -= 1
-        else:  # ударился об пол
-            self.y = DISPLAY_Y_PARAM - self.height - 50
-            self.is_jump = False
-            self.speed = self.s_speed
-            self.jump_power = self.s_jump_power
+        for ObjectOnMap in listObjectsOnMap:
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])):
+                self.y = ObjectOnMap.hitbox[1] - self.height - 1
+                self.is_jump = False
+                self.speed = self.s_speed
+                self.jump_power = self.s_jump_power
+                return
+        # if self.hitbox[1] + self.hitbox[3] + (self.jump_power ** 2) // 2 < DISPLAY_Y_PARAM - 20:
+        #     # летит вниз
+        self.y += (self.jump_power ** 2) // 2
+        self.jump_power -= 1
+        # else:  # ударился об пол
+        #     self.y = DISPLAY_Y_PARAM - self.height - 50
+        #     self.is_jump = False
+        #     self.speed = self.s_speed
+        #     self.jump_power = self.s_jump_power
 
     def loot(self, xp):
         if self.level + 1 <= self.maxLevel:
@@ -334,7 +361,7 @@ class Enemies(object):
     def __init__(self):
         self.width = 96
         self.height = 96
-        self.x = 0 - self.width  # DISPLAY_X_PARAM + self.width
+        self.x = DISPLAY_X_PARAM # DISPLAY_X_PARAM + self.width
         self.y = DISPLAY_Y_PARAM - self.height - 50
         self.walkCount = 0
         self.attackCount = 0
@@ -393,7 +420,7 @@ class Enemies(object):
             pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
             self.hitbox = (self.x + 3, self.y, 85, 96)
             # draw hitbox
-            # pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
+            pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
 
     def move(self):
         if len(Enemies.enemiesList) < 2:
@@ -426,8 +453,7 @@ class Enemies(object):
             else:
                 self.direction = 0
                 # атакует если он по y +- рядом
-                if player.hitbox[1] + player.hitbox[3] - self.height // 2  > self.hitbox[1] and player.hitbox[1] + self.height // 2 < self.hitbox[1] + self.hitbox[3]:
-                    self.attack()
+                if player.hitbox[1] + player.hitbox[3] - self.height // 2 > self.hitbox[1] and player.hitbox[1] + self.height // 2 < self.hitbox[1] + self.hitbox[3]:                    self.attack()
         self.x += self.speed * self.direction
 
     def attack(self):
@@ -442,7 +468,7 @@ class Enemies(object):
 
     def died(self):
         self.is_alive = False
-        woodmans.pop(woodmans.index(self))
+        zombies.pop(zombies.index(self))
         Enemies.enemiesList.pop(Enemies.enemiesList.index(self))
         global enemySpawnReload
         enemySpawnReload = 1
@@ -463,10 +489,10 @@ class arrow_class(object):
     def draw(self, display):
         middle_arrow_x = self.x + self.length // 2
         middle_arrow_y = self.y + self.width // 2
-        for woodman in woodmans:
-            if middle_arrow_x > woodman.hitbox[0] and middle_arrow_x < woodman.hitbox[0] + woodman.hitbox[2] and middle_arrow_y > woodman.hitbox[1] and middle_arrow_y < woodman.hitbox[1] + woodman.hitbox[3]:
+        for zombie in zombies:
+            if middle_arrow_x > zombie.hitbox[0] and middle_arrow_x < zombie.hitbox[0] + zombie.hitbox[2] and middle_arrow_y > zombie.hitbox[1] and middle_arrow_y < zombie.hitbox[1] + zombie.hitbox[3]:
                 # arrowHitSound.play()
-                woodman.hit(self.damage)
+                zombie.hit(self.damage)
                 arrowList.pop(arrowList.index(self))
                 return
         if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
@@ -480,18 +506,34 @@ class arrow_class(object):
             display.blit(self.arrowLeftDirection, (self.x, self.y))
 
 
-class Objects(object):
-    pass
+class ObjectsOnMap(object):
+    def __init__(self, x, y, lengthx, lengthy):
+        self.x = x
+        self.y = y
+        self.lengthx = lengthx
+        self.lengthy = lengthy
+        self.hitbox = (self.x, self.y, self.lengthx, self.lengthy)
+
+def drawObjectsOnMap(mapLevel):
+    if mapLevel == 1:
+        for ObjectOnMap in listObjectsOnMap:
+            pygame.draw.rect(display, (200, 200, 200), (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.lengthx, ObjectOnMap.lengthy))
+
 
 def draw_game_window():
     global run_main_while
+    global mapLevel
     display.blit(background, (0, 0))  # draw background on display
-    for woodman in woodmans:
-        woodman.draw(display)
-    player.draw()  # draw player on display
-
+    # draw all zombies
+    for zombie in zombies:
+        zombie.draw(display)
+    # draw player on display
+    player.draw()
+    # draw all arrows
     for arrow in arrowList:
         arrow.draw(display)
+
+    drawObjectsOnMap(mapLevel)
 
     if not (player.is_alive):
         fontDie = pygame.font.SysFont("arial", 60, True, True)
@@ -523,16 +565,27 @@ def draw_UI():
                      (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
     display.blit(arrow_class.arrowRightDirection, (DISPLAY_X_PARAM - 65, DISPLAY_Y_PARAM - 30))
 
+listObjectsOnMap = []
+listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
+listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
+listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 400))
+mapLevel = 1
+
+
+
 
 font = pygame.font.SysFont("arial", 20, True, True)
 run_main_while = True
 clock = pygame.time.Clock()
 player = player_class(50, DISPLAY_Y_PARAM - 96 - 50)  # DISPLAY_Y_PARAM - 96 - 20
-woodmans = []
+zombies = []
+
 arrowList = []
 swordReload = 0
 arrowsReload = 0
 enemySpawnReload = 0
+
 # MAIN LOOP
 while run_main_while:
     clock.tick(60)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
@@ -554,8 +607,8 @@ while run_main_while:
         # close game
         if event.type == pygame.QUIT:
             run_main_while = False
-    if len(woodmans) < 2 and enemySpawnReload == 0:
-        woodmans.append(Enemies())
+    if len(zombies) < 2 and enemySpawnReload == 0:
+        zombies.append(Enemies())
         enemySpawnReload += 1
     # лист со всеми нажатами клавишами
     keys = pygame.key.get_pressed()
@@ -573,6 +626,8 @@ while run_main_while:
     if keys[pygame.K_a] and player.x > 1:
         # бежит влево
         player.run_left()
+
+
     elif keys[pygame.K_d] and player.x < DISPLAY_X_PARAM - player.width:
         # бежит вправо
         player.run_right()

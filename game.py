@@ -95,6 +95,7 @@ class player_class(object):
         # триггер прыжка
         self.is_jump = False
         self.stand_on_enemy = False
+        self.stand_on_floor = True
         # состояние оружие
         self.is_archer = False
         self.is_swordsman = True
@@ -182,10 +183,21 @@ class player_class(object):
         self.leftDirection = True
         self.rightDirection = False
         self.is_run = True
+        # упор в стену
+        for ObjectOnMap in listObjectsOnMap:
+            if self.hitbox[0] - self.speed < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and self.hitbox[0] + self.hitbox[2] > \
+                    ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and (
+                    self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
+                    ObjectOnMap.hitbox[3]):
+                self.x = ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] + 1
+                self.stand()
+                return
         # упор в противника
         for zombie in zombies:
-            if self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] + zombie.hitbox[2] and (
-                    self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] + zombie.hitbox[3]):
+            if self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] + \
+                    self.hitbox[2] > zombie.hitbox[0] + zombie.hitbox[2] and (
+                    self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
+                    zombie.hitbox[3]):
                 self.x = zombie.hitbox[0] + zombie.hitbox[2] + 1
                 self.stand()
                 return
@@ -194,22 +206,36 @@ class player_class(object):
             сверяет крайнюю левую, правую и центральную
         """
         if self.stand_on_enemy:
-            k = 0
+            counter1 = 0
             for zombie in zombies:
                 if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]-self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]-self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2-self.speed>zombie.hitbox[0]):
-                    k +=1
+                    counter1 +=1
                     break
                 # if (self.hitbox[0] + self.hitbox[2] - self.speed > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]- self.speed < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - self.speed> zombie.hitbox[0]):
                 #     k += 1
                 #     break
-            if k == 0:
+            if counter1 == 0:
                 self.jump_power = 0
                 self.stand_on_enemy = False
                 self.pre_jump()
                 self.jump_down()
                 self.stand()
                 return
-        if self.is_run or len(zombies) == 0:
+        # counter2 = 0
+        # for ObjectOnMap in listObjectsOnMap:
+        #     if (ObjectOnMap.hitbox[1] == self.hitbox[1]+self.hitbox[3]):
+        #         print(ObjectOnMap.hitbox[1])
+        #         if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0]):
+        #             counter2 += 1
+        #             print(counter2)
+        #
+        # if counter2 == 0:
+        #     self.jump_power = 0
+        #     self.pre_jump()
+        #     self.jump_down()
+        #     self.stand()
+        #     return
+        if self.is_run:
             self.x -= self.speed
 
     def run_right(self):
@@ -221,6 +247,13 @@ class player_class(object):
                 0] and (self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
                         zombie.hitbox[3]):
                 self.x = zombie.hitbox[0] - self.hitbox[3] - 1
+                self.stand()
+                return
+        for ObjectOnMap in listObjectsOnMap:
+            if self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[
+                0] and (self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
+                        ObjectOnMap.hitbox[3]):
+                self.x = ObjectOnMap.hitbox[0] - self.hitbox[3] - 1
                 self.stand()
                 return
         """
@@ -267,15 +300,15 @@ class player_class(object):
 
     def jump_up(self):
         if self.jump_power > 0:  # летит вверх
-            for zombie in zombies:
-                if (self.hitbox[1] - self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > zombie.hitbox[1]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[ 0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2]//2 > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < zombie.hitbox[0] + zombie.hitbox[2])):
-                    self.y = zombie.hitbox[1] + zombie.hitbox[3] + 1
+            for ObjectOnMap in listObjectsOnMap:
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] and self.hitbox[1] > ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])):
+                    self.y = ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] + 1
                     self.jump_power = 0
                     self.jump_down()
                     return
-            for ObjectOnMap in listObjectsOnMap:
-                if (self.hitbox[1] - self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])):
-                    self.y = ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] + 1
+            for zombie in zombies:
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > zombie.hitbox[1]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[ 0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2]//2 > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < zombie.hitbox[0] + zombie.hitbox[2])):
+                    self.y = zombie.hitbox[1] + zombie.hitbox[3] + 1
                     self.jump_power = 0
                     self.jump_down()
                     return
@@ -292,30 +325,25 @@ class player_class(object):
         # летит вниз
 
     def jump_down(self):
+        for ObjectOnMap in listObjectsOnMap:
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1] and self.hitbox[1] + self.hitbox[3] <= ObjectOnMap.hitbox[1]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])):
+                self.y = ObjectOnMap.hitbox[1] - self.height
+                self.is_jump = False
+                self.stand_on_floor = True
+                self.speed = self.s_speed
+                self.jump_power = self.s_jump_power
+                return
         for zombie in zombies:
             if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > zombie.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[0] + zombie.hitbox[2])):
-                self.y = zombie.hitbox[1] - self.height - 1
+                self.y = zombie.hitbox[1] - self.height
                 self.is_jump = False
                 self.stand_on_enemy = True
+                self.stand_on_floor = False
                 self.speed = self.s_speed
                 self.jump_power = self.s_jump_power
                 return
-        for ObjectOnMap in listObjectsOnMap:
-            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])):
-                self.y = ObjectOnMap.hitbox[1] - self.height - 1
-                self.is_jump = False
-                self.speed = self.s_speed
-                self.jump_power = self.s_jump_power
-                return
-        # if self.hitbox[1] + self.hitbox[3] + (self.jump_power ** 2) // 2 < DISPLAY_Y_PARAM - 20:
-        #     # летит вниз
         self.y += (self.jump_power ** 2) // 2
         self.jump_power -= 1
-        # else:  # ударился об пол
-        #     self.y = DISPLAY_Y_PARAM - self.height - 50
-        #     self.is_jump = False
-        #     self.speed = self.s_speed
-        #     self.jump_power = self.s_jump_power
 
     def loot(self, xp):
         if self.level + 1 <= self.maxLevel:
@@ -525,8 +553,7 @@ def draw_game_window():
     global mapLevel
     display.blit(background, (0, 0))  # draw background on display
     # draw all zombies
-    for zombie in zombies:
-        zombie.draw(display)
+
     # draw player on display
     player.draw()
     # draw all arrows
@@ -534,7 +561,8 @@ def draw_game_window():
         arrow.draw(display)
 
     drawObjectsOnMap(mapLevel)
-
+    for zombie in zombies:
+        zombie.draw(display)
     if not (player.is_alive):
         fontDie = pygame.font.SysFont("arial", 60, True, True)
         textDie = fontDie.render("YOU DIED", True, (60, 0, 0))
@@ -542,6 +570,7 @@ def draw_game_window():
         pygame.display.update()  # update display
         pygame.time.wait(3000)
         run_main_while = False
+
     draw_UI()
     pygame.display.update()
 
@@ -568,6 +597,8 @@ def draw_UI():
 listObjectsOnMap = []
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(200, 400, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(0, 200, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
 listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 400))
 mapLevel = 1

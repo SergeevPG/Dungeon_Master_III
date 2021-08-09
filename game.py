@@ -124,7 +124,7 @@ class player_class(object):
                 elif self.leftDirection:
                     self.draw_run(display, self.heroSwordsManRunLeft)
         self.hitbox = (self.x, self.y, 96, 96)
-        pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
+        # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def draw_attackAnimation(self, display, heroAnimation):
         if self.attackCount + 1 >= 30:
@@ -202,6 +202,7 @@ class player_class(object):
                 self.stand()
                 return
         """
+            проверка на падение с зомби
             сверяет находится ли 3 точки игрока по Х внутри хитбокса противника по Х
             сверяет крайнюю левую, правую и центральную
         """
@@ -211,9 +212,6 @@ class player_class(object):
                 if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]-self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]-self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2-self.speed>zombie.hitbox[0]):
                     counter1 +=1
                     break
-                # if (self.hitbox[0] + self.hitbox[2] - self.speed > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]- self.speed < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] - self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - self.speed> zombie.hitbox[0]):
-                #     k += 1
-                #     break
             if counter1 == 0:
                 self.jump_power = 0
                 self.stand_on_enemy = False
@@ -222,10 +220,15 @@ class player_class(object):
                 self.stand()
                 return
         # counter2 = 0
-        # for ObjectOnMap in listObjectsOnMap:
-        #     if (ObjectOnMap.hitbox[1] == self.hitbox[1]+self.hitbox[3]):
-        #         print(ObjectOnMap.hitbox[1])
-        #         if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0]):
+        for ObjectOnMap in listObjectsOnMap:
+            if (ObjectOnMap.hitbox[1] == self.hitbox[1]+self.hitbox[3]):
+                print(ObjectOnMap.hitbox[1])
+                if (ObjectOnMap.hitbox[0]> self.hitbox[0]+self.hitbox[2]- self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0])):
+                    self.jump_power = 0
+                    self.pre_jump()
+                    self.jump_down()
+                    # self.stand()
+        #             return
         #             counter2 += 1
         #             print(counter2)
         #
@@ -235,6 +238,10 @@ class player_class(object):
         #     self.jump_down()
         #     self.stand()
         #     return
+        """
+            проверка на все условия остановки пройдены успешно
+            продолжаем движение влево
+        """
         if self.is_run:
             self.x -= self.speed
 
@@ -242,13 +249,7 @@ class player_class(object):
         self.rightDirection = True
         self.leftDirection = False
         self.is_run = True
-        for zombie in zombies:
-            if self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[
-                0] and (self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
-                        zombie.hitbox[3]):
-                self.x = zombie.hitbox[0] - self.hitbox[3] - 1
-                self.stand()
-                return
+        # упорт в стену
         for ObjectOnMap in listObjectsOnMap:
             if self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[
                 0] and (self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
@@ -256,7 +257,16 @@ class player_class(object):
                 self.x = ObjectOnMap.hitbox[0] - self.hitbox[3] - 1
                 self.stand()
                 return
+        # упор в противника
+        for zombie in zombies:
+            if self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[
+                0] and (self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
+                        zombie.hitbox[3]):
+                self.x = zombie.hitbox[0] - self.hitbox[3] - 1
+                self.stand()
+                return
         """
+            проверка на падение с зомби
             сверяет находится ли 3 точки игрока по Х внутри хитбокса противника по Х
             сверяет крайнюю левую, правую и центральную
         """
@@ -266,9 +276,6 @@ class player_class(object):
                 if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+ self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]+ self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2+ self.speed>zombie.hitbox[0]):
                     k +=1
                     break
-                # if (self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and  self.hitbox[0] + self.hitbox[2] + self.speed < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.speed < zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] + self.speed > zombie.hitbox[0]):
-                #     k += 1
-                #     break
             if k == 0:
                 self.jump_power = 0
                 self.stand_on_enemy = False
@@ -276,8 +283,11 @@ class player_class(object):
                 self.jump_down()
                 self.stand()
                 return
-            k=0
-        if self.is_run or len(zombies)==0:
+        """
+            проверка на все условия остановки пройдены успешно
+            продолжаем движение вправо
+        """
+        if self.is_run:
             self.x += self.speed
 
     def stand(self):
@@ -413,12 +423,11 @@ class Enemies(object):
             if self.attack_delay > 0:
                 self.attack_delay += 1
             if self.is_attack and self.attack_delay == 0:
-                if self.attackCount + 1 >= 40:
-                    self.attackCount = 0
-                    self.is_attack = False
-                    self.walkCount = 0
-                if self.attackCount == 38:
+                if self.attackCount == 39:
                     player.hit(self.damage)
+                    self.is_attack = False
+                    self.attackCount = 0
+                    self.walkCount = 0
                     self.attack_delay += 1
                 if self.last_direction == -1:
                     display.blit(self.attackLeft[self.attackCount // 10], (self.x, self.y))
@@ -448,44 +457,65 @@ class Enemies(object):
             pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
             self.hitbox = (self.x + 3, self.y, 85, 96)
             # draw hitbox
-            pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
+            # pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
 
     def move(self):
-        if len(Enemies.enemiesList) < 2:
-            if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
-                self.is_attack = False
-                self.direction = -1
-                self.last_direction = self.direction
-            elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
-                self.is_attack = False
-                self.direction = 1
-                self.last_direction = self.direction
-            else:
-                self.direction = 0
+        if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
+            # идет влево
+            self.run_Left()
+        elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
+            # идет вправо
+            self.run_Right()
         else:
-            if self.hitbox[0] - self.speed > player.hitbox[0] + player.hitbox[2]:
-                self.is_attack = False
-                self.last_direction = self.direction = -1
-                for woodIndex in Enemies.enemiesList:
-                    if woodIndex != self:
-                        if (self.hitbox[0] - self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]) and (
-                                self.hitbox[0] - self.speed > woodIndex.hitbox[0]):
-                            self.direction = 0
-            elif self.hitbox[0] + self.hitbox[2] + self.speed < player.hitbox[0]:
-                self.is_attack = False
-                self.last_direction = self.direction = 1
-                for woodIndex in Enemies.enemiesList:
-                    if woodIndex != self:
-                        if (self.hitbox[0] + self.hitbox[2] + self.speed > woodIndex.hitbox[0]) and (self.hitbox[0] + self.hitbox[2] + self.speed < woodIndex.hitbox[0] + woodIndex.hitbox[2]):
-                            self.direction = 0
-            else:
-                self.direction = 0
-                # атакует если он по y +- рядом
-                if player.hitbox[1] + player.hitbox[3] - self.height // 2 > self.hitbox[1] and player.hitbox[1] + self.height // 2 < self.hitbox[1] + self.hitbox[3]:                    self.attack()
+            # атакует если он по y +- рядом
+            self.attack()
+        # движение в зависимости от параметра направления
         self.x += self.speed * self.direction
 
+    def run_Right(self):
+        self.last_direction = self.direction = 1
+        # проверка упора в стену
+        for ObjectOnMap in listObjectsOnMap:
+            if self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0] and self.hitbox[0] < \
+                    ObjectOnMap.hitbox[
+                        0] and (self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] <
+                                ObjectOnMap.hitbox[1] +
+                                ObjectOnMap.hitbox[3]):
+                self.direction = 0
+                return
+        # проверка упора в другого противника
+        for enemIndex in Enemies.enemiesList:
+            if enemIndex != self:
+                if (self.hitbox[0] + self.hitbox[2] + self.speed > enemIndex.hitbox[0]) and (
+                        self.hitbox[0] + self.hitbox[2] + self.speed < enemIndex.hitbox[0] + enemIndex.hitbox[2]):
+                    self.direction = 0
+                    return
+
+    def run_Left(self):
+        self.last_direction = self.direction = -1
+        # проверка упора в стену
+        for ObjectOnMap in listObjectsOnMap:
+            if self.hitbox[0] - self.speed < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and self.hitbox[0] + \
+                    self.hitbox[2] > \
+                    ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and (
+                    self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] <
+                    ObjectOnMap.hitbox[1] +
+                    ObjectOnMap.hitbox[3]):
+                self.direction = 0
+                return
+        # проверка упора в другого противника
+        for enemIndex in Enemies.enemiesList:
+            if enemIndex != self:
+                if (self.hitbox[0] - self.speed < enemIndex.hitbox[0] + enemIndex.hitbox[2]) and (
+                        self.hitbox[0] - self.speed > enemIndex.hitbox[0]):
+                    self.direction = 0
+                    return
+
     def attack(self):
-        self.is_attack = True
+        self.direction = 0
+        if player.hitbox[1] + player.hitbox[3] - self.height // 2 > self.hitbox[1] and player.hitbox[
+            1] + self.height // 2 < self.hitbox[1] + self.hitbox[3]:
+            self.is_attack = True
 
     def hit(self, damage):
         if self.health - damage <= 0:
@@ -517,15 +547,23 @@ class arrow_class(object):
     def draw(self, display):
         middle_arrow_x = self.x + self.length // 2
         middle_arrow_y = self.y + self.width // 2
+        # проверка на встречу с объектом
+        for ObjectOnMap in listObjectsOnMap:
+            if (ObjectOnMap.hitbox[0] < middle_arrow_x < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) and (ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] > middle_arrow_y > ObjectOnMap.hitbox[1]):
+                arrowList.pop(arrowList.index(self))
+                return
+        # проверка на встречу с зомби
         for zombie in zombies:
             if middle_arrow_x > zombie.hitbox[0] and middle_arrow_x < zombie.hitbox[0] + zombie.hitbox[2] and middle_arrow_y > zombie.hitbox[1] and middle_arrow_y < zombie.hitbox[1] + zombie.hitbox[3]:
                 # arrowHitSound.play()
                 zombie.hit(self.damage)
                 arrowList.pop(arrowList.index(self))
                 return
+
         if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
             self.x += self.speed
         else:
+            # удаление объекта за экраном
             arrowList.pop(arrowList.index(self))
             return
         if self.direction == 1:
@@ -597,10 +635,10 @@ def draw_UI():
 listObjectsOnMap = []
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
-listObjectsOnMap.append(ObjectsOnMap(200, 400, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(200, 400, 150, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, 200, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
-listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 400))
+listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 350))
 mapLevel = 1
 
 
@@ -632,7 +670,7 @@ while run_main_while:
 
     if enemySpawnReload > 0:
         enemySpawnReload += 1
-    if enemySpawnReload == 100:
+    if enemySpawnReload == 120:
         enemySpawnReload = 0
     for event in pygame.event.get():
         # close game

@@ -219,29 +219,34 @@ class player_class(object):
                 self.jump_down()
                 self.stand()
                 return
-        # counter2 = 0
-        for ObjectOnMap in listObjectsOnMap:
-            if (ObjectOnMap.hitbox[1] == self.hitbox[1]+self.hitbox[3]):
-                print(ObjectOnMap.hitbox[1])
-                if (ObjectOnMap.hitbox[0]> self.hitbox[0]+self.hitbox[2]- self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0])):
-                    self.jump_power = 0
-                    self.pre_jump()
-                    self.jump_down()
-                    # self.stand()
-        #             return
-        #             counter2 += 1
-        #             print(counter2)
-        #
-        # if counter2 == 0:
-        #     self.jump_power = 0
-        #     self.pre_jump()
-        #     self.jump_down()
-        #     self.stand()
-        #     return
+        """
+            проверка на падение с объекта на карте
+            сверяет находится ли его ноги на верхней границе объекта
+            сверяет находится ли 3 точки игрока по Х внутри хитбокса объекта по Х
+            сверяет крайнюю левую, правую и центральную
+        """
+        if self.stand_on_floor:
+            counter2 = 0
+            for ObjectOnMap in listObjectsOnMap:
+                # если ноги на объекте
+                if (ObjectOnMap.hitbox[1]<self.hitbox[1]+ self.hitbox[3]+3<ObjectOnMap.hitbox[1]+ObjectOnMap.hitbox[3]):
+                    # и она по х на одном уровне
+                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed >ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0]):
+                        counter2 += 1
+                        break
+            # падает, если сейчас не прыгает
+            if counter2 == 0 and (self.is_jump==False):
+                self.jump_power = 0
+                self.stand_on_floor = False
+                self.pre_jump()
+                self.jump_up()
+                self.stand()
+                return
         """
             проверка на все условия остановки пройдены успешно
             продолжаем движение влево
         """
+
         if self.is_run:
             self.x -= self.speed
 
@@ -281,6 +286,29 @@ class player_class(object):
                 self.stand_on_enemy = False
                 self.pre_jump()
                 self.jump_down()
+                self.stand()
+                return
+        """
+            проверка на падение с объекта на карте
+            сверяет находится ли его ноги на верхней границе объекта
+            сверяет находится ли 3 точки игрока по Х внутри хитбокса объекта по Х
+            сверяет крайнюю левую, правую и центральную
+        """
+        if self.stand_on_floor:
+            counter2 = 0
+            for ObjectOnMap in listObjectsOnMap:
+                # если ноги на объекте
+                if (ObjectOnMap.hitbox[1]<self.hitbox[1]+ self.hitbox[3]+3<ObjectOnMap.hitbox[1]+ObjectOnMap.hitbox[3]):
+                    # и она по х на одном уровне
+                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 + self.speed > ObjectOnMap.hitbox[0]):
+                        counter2 += 1
+                        break
+            # падает, если сейчас не прыгает
+            if counter2 == 0 and (self.is_jump==False):
+                self.jump_power = 0
+                self.stand_on_floor = False
+                self.pre_jump()
+                self.jump_up()
                 self.stand()
                 return
         """
@@ -573,6 +601,7 @@ class arrow_class(object):
 
 
 class ObjectsOnMap(object):
+    StoneIMG = pygame.image.load(r"Images\Map\Objects\stone.jpg")
     def __init__(self, x, y, lengthx, lengthy):
         self.x = x
         self.y = y
@@ -583,7 +612,8 @@ class ObjectsOnMap(object):
 def drawObjectsOnMap(mapLevel):
     if mapLevel == 1:
         for ObjectOnMap in listObjectsOnMap:
-            pygame.draw.rect(display, (200, 200, 200), (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.lengthx, ObjectOnMap.lengthy))
+            # display.blit(ObjectsOnMap.StoneIMG, (ObjectOnMap.x, ObjectOnMap.y),BLEND_ADD)
+            pygame.draw.rect(display, (150, 150, 150), (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.lengthx, ObjectOnMap.lengthy))
 
 
 def draw_game_window():
@@ -614,7 +644,7 @@ def draw_game_window():
 
 def draw_UI():
     # backgroud UI
-    pygame.draw.rect(display, (35, 20, 35), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
+    # pygame.draw.rect(display, (0, 0, 0), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
     # health bar
     display.blit(player.heroHealth[player.health], (15, DISPLAY_Y_PARAM - 45))
     # xp bar
@@ -635,8 +665,9 @@ def draw_UI():
 listObjectsOnMap = []
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
-listObjectsOnMap.append(ObjectsOnMap(200, 400, 150, 50))
-listObjectsOnMap.append(ObjectsOnMap(0, 200, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(200, 400, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(0, 250, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(500, 200, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
 listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 350))
 mapLevel = 1
@@ -654,7 +685,7 @@ arrowList = []
 swordReload = 0
 arrowsReload = 0
 enemySpawnReload = 0
-
+heroJumpReload = 0
 # MAIN LOOP
 while run_main_while:
     clock.tick(60)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
@@ -672,6 +703,12 @@ while run_main_while:
         enemySpawnReload += 1
     if enemySpawnReload == 120:
         enemySpawnReload = 0
+
+    if heroJumpReload > 0:
+        heroJumpReload += 1
+    if heroJumpReload == 35:
+        heroJumpReload = 0
+
     for event in pygame.event.get():
         # close game
         if event.type == pygame.QUIT:
@@ -707,8 +744,9 @@ while run_main_while:
         # прыжок
         player.jump_up()
     else:
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_SPACE] and heroJumpReload == 0:
             # подготовка к прыжку
+            heroJumpReload += 1
             player.pre_jump()
     draw_game_window()
 pygame.quit()

@@ -1,59 +1,60 @@
 import random
 import pygame
+
 pygame.init()
 DISPLAY_Y_PARAM = 800
 DISPLAY_X_PARAM = 1100
-display = pygame.display.set_mode((DISPLAY_X_PARAM, DISPLAY_Y_PARAM))
+display = pygame.display.set_mode((DISPLAY_X_PARAM, DISPLAY_Y_PARAM))#, pygame.FULLSCREEN | pygame.RESIZABLE
 pygame.display.set_caption("Dungeon Master III")
-background = pygame.image.load(r'Images\Map\Background\bg.jpg')
+pygame.display.set_icon(pygame.image.load(r'Images\Map\Background\bg.jpg').convert())
+background = pygame.image.load(r'Images\Map\Background\bg.jpg').convert()
 music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
-
 
 
 # pygame.mixer.music.play(-1)
 
 class player_class(object):
-    heroHealth = [pygame.image.load(r"Images\Hero\Health\health_0.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_1.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_2.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_3.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_4.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_5.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_6.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_7.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_8.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_9.png"),
-                  pygame.image.load(r"Images\Hero\Health\health_10.png")]
-    heroArcherRunRight = [pygame.image.load(r'Images\Hero\Archer\RunRight\R1.png'),
-                          pygame.image.load(r'Images\Hero\Archer\RunRight\R2.png'),
-                          pygame.image.load(r'Images\Hero\Archer\RunRight\R3.png'),
-                          pygame.image.load(r'Images\Hero\Archer\RunRight\R4.png'),
-                          pygame.image.load(r'Images\Hero\Archer\RunRight\R5.png')]
-    heroArcherRunLeft = [pygame.image.load(r'Images\Hero\Archer\RunLeft\L1.png'),
-                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L2.png'),
-                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L3.png'),
-                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L4.png'),
-                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L5.png')]
-    heroSwordsManRunRight = [pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R1.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R2.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R3.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R4.png'),
-                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R5.png')]
-    heroSwordsManRunLeft = [pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L1.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L2.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L3.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L4.png'),
-                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L5.png')]
-    heroSwordsManAttackRight = [pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R1.png'),
-                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R2.png'),
-                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R3.png'),
-                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R4.png'),
-                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R5.png')]
-    heroSwordsManAttackLeft = [pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L1.png'),
-                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L2.png'),
-                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L3.png'),
-                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L4.png'),
-                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L5.png')]
+    heroHealth = [pygame.image.load(r"Images\Hero\Health\health_0.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_1.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_2.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_3.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_4.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_5.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_6.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_7.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_8.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_9.png").convert_alpha(),
+                  pygame.image.load(r"Images\Hero\Health\health_10.png").convert_alpha()]
+    heroArcherRunRight = [pygame.image.load(r'Images\Hero\Archer\RunRight\R1.png').convert_alpha(),
+                          pygame.image.load(r'Images\Hero\Archer\RunRight\R2.png').convert_alpha(),
+                          pygame.image.load(r'Images\Hero\Archer\RunRight\R3.png').convert_alpha(),
+                          pygame.image.load(r'Images\Hero\Archer\RunRight\R4.png').convert_alpha(),
+                          pygame.image.load(r'Images\Hero\Archer\RunRight\R5.png').convert_alpha()]
+    heroArcherRunLeft = [pygame.image.load(r'Images\Hero\Archer\RunLeft\L1.png').convert_alpha(),
+                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L2.png').convert_alpha(),
+                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L3.png').convert_alpha(),
+                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L4.png').convert_alpha(),
+                         pygame.image.load(r'Images\Hero\Archer\RunLeft\L5.png').convert_alpha()]
+    heroSwordsManRunRight = [pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R1.png').convert_alpha(),
+                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R2.png').convert_alpha(),
+                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R3.png').convert_alpha(),
+                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R4.png').convert_alpha(),
+                             pygame.image.load(r'Images\Hero\SwordsMan\RunRight\R5.png').convert_alpha()]
+    heroSwordsManRunLeft = [pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L1.png').convert_alpha(),
+                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L2.png').convert_alpha(),
+                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L3.png').convert_alpha(),
+                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L4.png').convert_alpha(),
+                            pygame.image.load(r'Images\Hero\SwordsMan\RunLeft\L5.png').convert_alpha()]
+    heroSwordsManAttackRight = [pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R1.png').convert_alpha(),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R2.png').convert_alpha(),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R3.png').convert_alpha(),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R4.png').convert_alpha(),
+                                pygame.image.load(r'Images\Hero\SwordsMan\AttackRight\R5.png').convert_alpha()]
+    heroSwordsManAttackLeft = [pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L1.png').convert_alpha(),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L2.png').convert_alpha(),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L3.png').convert_alpha(),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L4.png').convert_alpha(),
+                               pygame.image.load(r'Images\Hero\SwordsMan\AttackLeft\L5.png').convert_alpha()]
 
     def __init__(self, x, y):
         # начальное положение
@@ -123,8 +124,8 @@ class player_class(object):
                     self.draw_run(display, self.heroSwordsManRunRight)
                 elif self.leftDirection:
                     self.draw_run(display, self.heroSwordsManRunLeft)
-        self.hitbox = (self.x, self.y, 96, 96)
-        # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
+        self.hitbox = (self.x+15, self.y, 55, 96)
+        pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def draw_attackAnimation(self, display, heroAnimation):
         if self.attackCount + 1 >= 30:
@@ -157,13 +158,16 @@ class player_class(object):
             if self.rightDirection:
                 for zombie in zombies:
                     if self.hitbox[0] <= zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] + 80 >= zombie.hitbox[0]:
-                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
+                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[
+                            1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
                             self.is_attack_hit = True
                             self.whichZombieHit = zombie
             elif self.leftDirection:
                 for zombie in zombies:
-                    if self.hitbox[0] + self.hitbox[2] >= zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - 80 <= zombie.hitbox[0] + zombie.hitbox[2]:
-                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
+                    if self.hitbox[0] + self.hitbox[2] >= zombie.hitbox[0] + zombie.hitbox[2] and self.hitbox[0] - 80 <= \
+                            zombie.hitbox[0] + zombie.hitbox[2]:
+                        if self.hitbox[1] + self.hitbox[3] - self.height // 2 > zombie.hitbox[1] and self.hitbox[
+                            1] + self.height // 2 < zombie.hitbox[1] + zombie.hitbox[3]:
                             self.is_attack_hit = True
                             self.whichZombieHit = zombie
 
@@ -185,11 +189,12 @@ class player_class(object):
         self.is_run = True
         # упор в стену
         for ObjectOnMap in listObjectsOnMap:
-            if self.hitbox[0] - self.speed < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and self.hitbox[0] + self.hitbox[2] > \
+            if self.hitbox[0] - self.speed < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and self.hitbox[0] + \
+                    self.hitbox[2] > \
                     ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] and (
                     self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
                     ObjectOnMap.hitbox[3]):
-                self.x = ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] + 1
+                # self.x = ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] + 1
                 self.stand()
                 return
         # упор в противника
@@ -198,7 +203,7 @@ class player_class(object):
                     self.hitbox[2] > zombie.hitbox[0] + zombie.hitbox[2] and (
                     self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
                     zombie.hitbox[3]):
-                self.x = zombie.hitbox[0] + zombie.hitbox[2] + 1
+                # self.x = zombie.hitbox[0] + zombie.hitbox[2] + 1
                 self.stand()
                 return
         """
@@ -209,8 +214,12 @@ class player_class(object):
         if self.stand_on_enemy:
             counter1 = 0
             for zombie in zombies:
-                if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]-self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]-self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2-self.speed>zombie.hitbox[0]):
-                    counter1 +=1
+                if (zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] - self.speed > zombie.hitbox[0]) or (
+                        zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed >
+                        zombie.hitbox[0]) or (
+                        zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed >
+                        zombie.hitbox[0]):
+                    counter1 += 1
                     break
             if counter1 == 0:
                 self.jump_power = 0
@@ -229,13 +238,19 @@ class player_class(object):
             counter2 = 0
             for ObjectOnMap in listObjectsOnMap:
                 # если ноги на объекте
-                if (ObjectOnMap.hitbox[1]<self.hitbox[1]+ self.hitbox[3]+3<ObjectOnMap.hitbox[1]+ObjectOnMap.hitbox[3]):
+                if (ObjectOnMap.hitbox[1] < self.hitbox[1] + self.hitbox[3] + 3 < ObjectOnMap.hitbox[1] +
+                        ObjectOnMap.hitbox[3]):
                     # и она по х на одном уровне
-                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] - self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] - self.speed >ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 - self.speed > ObjectOnMap.hitbox[0]):
+                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] - self.speed >
+                        ObjectOnMap.hitbox[0]) or (
+                            ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[
+                        2] - self.speed > ObjectOnMap.hitbox[0]) or (
+                            ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[
+                        2] // 2 - self.speed > ObjectOnMap.hitbox[0]):
                         counter2 += 1
                         break
             # падает, если сейчас не прыгает
-            if counter2 == 0 and (self.is_jump==False):
+            if counter2 == 0 and (self.is_jump == False):
                 self.jump_power = 0
                 self.stand_on_floor = False
                 self.pre_jump()
@@ -256,10 +271,12 @@ class player_class(object):
         self.is_run = True
         # упорт в стену
         for ObjectOnMap in listObjectsOnMap:
-            if self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[
-                0] and (self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
-                        ObjectOnMap.hitbox[3]):
-                self.x = ObjectOnMap.hitbox[0] - self.hitbox[3] - 1
+            if self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0] and self.hitbox[0] < \
+                    ObjectOnMap.hitbox[
+                        0] and (
+                    self.hitbox[1] + self.hitbox[3] > ObjectOnMap.hitbox[1] and self.hitbox[1] < ObjectOnMap.hitbox[1] +
+                    ObjectOnMap.hitbox[3]):
+                # self.x = ObjectOnMap.hitbox[0] - self.hitbox[2]
                 self.stand()
                 return
         # упор в противника
@@ -267,7 +284,7 @@ class player_class(object):
             if self.hitbox[0] + self.hitbox[2] + self.speed > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[
                 0] and (self.hitbox[1] + self.hitbox[3] > zombie.hitbox[1] and self.hitbox[1] < zombie.hitbox[1] +
                         zombie.hitbox[3]):
-                self.x = zombie.hitbox[0] - self.hitbox[3] - 1
+                # self.x = zombie.hitbox[0] - self.hitbox[2]
                 self.stand()
                 return
         """
@@ -278,8 +295,12 @@ class player_class(object):
         if self.stand_on_enemy:
             k = 0
             for zombie in zombies:
-                if (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+ self.speed>zombie.hitbox[0]) or(zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]+ self.speed>zombie.hitbox[0]) or (zombie.hitbox[0] + zombie.hitbox[2]>self.hitbox[0]+self.hitbox[2]//2+ self.speed>zombie.hitbox[0]):
-                    k +=1
+                if (zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] + self.speed > zombie.hitbox[0]) or (
+                        zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] + self.hitbox[2] + self.speed >
+                        zombie.hitbox[0]) or (
+                        zombie.hitbox[0] + zombie.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 + self.speed >
+                        zombie.hitbox[0]):
+                    k += 1
                     break
             if k == 0:
                 self.jump_power = 0
@@ -298,13 +319,19 @@ class player_class(object):
             counter2 = 0
             for ObjectOnMap in listObjectsOnMap:
                 # если ноги на объекте
-                if (ObjectOnMap.hitbox[1]<self.hitbox[1]+ self.hitbox[3]+3<ObjectOnMap.hitbox[1]+ObjectOnMap.hitbox[3]):
+                if (ObjectOnMap.hitbox[1] < self.hitbox[1] + self.hitbox[3] + 3 < ObjectOnMap.hitbox[1] +
+                        ObjectOnMap.hitbox[3]):
                     # и она по х на одном уровне
-                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] + self.speed > ObjectOnMap.hitbox[0]) or (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[2] // 2 + self.speed > ObjectOnMap.hitbox[0]):
+                    if (ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.speed >
+                        ObjectOnMap.hitbox[0]) or (
+                            ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[
+                        2] + self.speed > ObjectOnMap.hitbox[0]) or (
+                            ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2] > self.hitbox[0] + self.hitbox[
+                        2] // 2 + self.speed > ObjectOnMap.hitbox[0]):
                         counter2 += 1
                         break
             # падает, если сейчас не прыгает
-            if counter2 == 0 and (self.is_jump==False):
+            if counter2 == 0 and (self.is_jump == False):
                 self.jump_power = 0
                 self.stand_on_floor = False
                 self.pre_jump()
@@ -339,13 +366,49 @@ class player_class(object):
     def jump_up(self):
         if self.jump_power > 0:  # летит вверх
             for ObjectOnMap in listObjectsOnMap:
-                if (self.hitbox[1] - self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] and self.hitbox[1] > ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[ 0] + ObjectOnMap.hitbox[2])):
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] and
+                    self.hitbox[1] > ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3]) and ((self.hitbox[0] >
+                                                                                          ObjectOnMap.hitbox[0] and
+                                                                                          self.hitbox[0] <
+                                                                                          ObjectOnMap.hitbox[0] +
+                                                                                          ObjectOnMap.hitbox[2]) or (
+                                                                                                 self.hitbox[0] +
+                                                                                                 self.hitbox[2] >
+                                                                                                 ObjectOnMap.hitbox[
+                                                                                                     0] and self.hitbox[
+                                                                                                     0] + self.hitbox[
+                                                                                                     2] <
+                                                                                                 ObjectOnMap.hitbox[0] +
+                                                                                                 ObjectOnMap.hitbox[
+                                                                                                     2]) or (
+                                                                                                 self.hitbox[0] +
+                                                                                                 self.hitbox[2] // 2 >
+                                                                                                 ObjectOnMap.hitbox[
+                                                                                                     0] and self.hitbox[
+                                                                                                     0] + self.hitbox[
+                                                                                                     2] // 2 <
+                                                                                                 ObjectOnMap.hitbox[0] +
+                                                                                                 ObjectOnMap.hitbox[
+                                                                                                     2])):
                     self.y = ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] + 1
                     self.jump_power = 0
                     self.jump_down()
                     return
             for zombie in zombies:
-                if (self.hitbox[1] - self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3] and self.hitbox[1] - self.jump_power ** 2 // 2 > zombie.hitbox[1]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[ 0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2]//2 > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < zombie.hitbox[0] + zombie.hitbox[2])):
+                if (self.hitbox[1] - self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3] and self.hitbox[
+                    1] - self.jump_power ** 2 // 2 > zombie.hitbox[1]) and ((self.hitbox[0] > zombie.hitbox[0] and
+                                                                             self.hitbox[0] < zombie.hitbox[0] +
+                                                                             zombie.hitbox[2]) or (
+                                                                                    self.hitbox[0] + self.hitbox[2] >
+                                                                                    zombie.hitbox[0] and self.hitbox[
+                                                                                        0] + self.hitbox[2] <
+                                                                                    zombie.hitbox[0] + zombie.hitbox[
+                                                                                        2]) or (
+                                                                                    self.hitbox[0] + self.hitbox[
+                                                                                2] // 2 > zombie.hitbox[0] and
+                                                                                    self.hitbox[0] + self.hitbox[
+                                                                                        2] // 2 < zombie.hitbox[0] +
+                                                                                    zombie.hitbox[2])):
                     self.y = zombie.hitbox[1] + zombie.hitbox[3] + 1
                     self.jump_power = 0
                     self.jump_down()
@@ -364,7 +427,16 @@ class player_class(object):
 
     def jump_down(self):
         for ObjectOnMap in listObjectsOnMap:
-            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1] and self.hitbox[1] + self.hitbox[3] <= ObjectOnMap.hitbox[1]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])or (self.hitbox[0] + self.hitbox[2]//2 > ObjectOnMap.hitbox[0] and self.hitbox[0] + self.hitbox[2]//2 < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2])):
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > ObjectOnMap.hitbox[1] and self.hitbox[1] +
+                self.hitbox[3] <= ObjectOnMap.hitbox[1]) and ((self.hitbox[0] > ObjectOnMap.hitbox[0] and self.hitbox[
+                0] < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] >
+                                                                        ObjectOnMap.hitbox[0] and self.hitbox[0] +
+                                                                        self.hitbox[2] < ObjectOnMap.hitbox[0] +
+                                                                        ObjectOnMap.hitbox[2]) or (
+                                                                      self.hitbox[0] + self.hitbox[2] // 2 >
+                                                                      ObjectOnMap.hitbox[0] and self.hitbox[0] +
+                                                                      self.hitbox[2] // 2 < ObjectOnMap.hitbox[0] +
+                                                                      ObjectOnMap.hitbox[2])):
                 self.y = ObjectOnMap.hitbox[1] - self.height
                 self.is_jump = False
                 self.stand_on_floor = True
@@ -372,7 +444,11 @@ class player_class(object):
                 self.jump_power = self.s_jump_power
                 return
         for zombie in zombies:
-            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > zombie.hitbox[1] and self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3]) and ((self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] < zombie.hitbox[0] + zombie.hitbox[2])):
+            if (self.hitbox[1] + self.hitbox[3] + self.jump_power ** 2 // 2 > zombie.hitbox[1] and self.hitbox[1] +
+                self.hitbox[3] + self.jump_power ** 2 // 2 < zombie.hitbox[1] + zombie.hitbox[3]) and (
+                    (self.hitbox[0] > zombie.hitbox[0] and self.hitbox[0] < zombie.hitbox[0] + zombie.hitbox[2]) or (
+                    self.hitbox[0] + self.hitbox[2] > zombie.hitbox[0] and self.hitbox[0] + self.hitbox[2] <
+                    zombie.hitbox[0] + zombie.hitbox[2])):
                 self.y = zombie.hitbox[1] - self.height
                 self.is_jump = False
                 self.stand_on_enemy = True
@@ -406,28 +482,28 @@ class player_class(object):
 
 
 class Enemies(object):
-    runRight = [pygame.image.load(r"Images\Enemies\Zombie\Run\R1.png"),
-                pygame.image.load(r"Images\Enemies\Zombie\Run\R2.png"),
-                pygame.image.load(r"Images\Enemies\Zombie\Run\R3.png"),
-                pygame.image.load(r"Images\Enemies\Zombie\Run\R4.png")]
-    runLeft = [pygame.image.load(r"Images\Enemies\Zombie\Run\L1.png"),
-               pygame.image.load(r"Images\Enemies\Zombie\Run\L2.png"),
-               pygame.image.load(r"Images\Enemies\Zombie\Run\L3.png"),
-               pygame.image.load(r"Images\Enemies\Zombie\Run\L4.png")]
-    attackRight = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR1.png"),
-                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR2.png"),
-                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR3.png"),
-                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR4.png")]
-    attackLeft = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL1.png"),
-                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL2.png"),
-                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL3.png"),
-                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL4.png")]
+    runRight = [pygame.image.load(r"Images\Enemies\Zombie\Run\R1.png").convert_alpha(),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R2.png").convert_alpha(),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R3.png").convert_alpha(),
+                pygame.image.load(r"Images\Enemies\Zombie\Run\R4.png").convert_alpha()]
+    runLeft = [pygame.image.load(r"Images\Enemies\Zombie\Run\L1.png").convert_alpha(),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L2.png").convert_alpha(),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L3.png").convert_alpha(),
+               pygame.image.load(r"Images\Enemies\Zombie\Run\L4.png").convert_alpha()]
+    attackRight = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR1.png").convert_alpha(),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR2.png").convert_alpha(),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR3.png").convert_alpha(),
+                   pygame.image.load(r"Images\Enemies\Zombie\Attack\attackR4.png").convert_alpha()]
+    attackLeft = [pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL1.png").convert_alpha(),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL2.png").convert_alpha(),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL3.png").convert_alpha(),
+                  pygame.image.load(r"Images\Enemies\Zombie\Attack\attackL4.png").convert_alpha()]
     enemiesList = []
 
     def __init__(self):
         self.width = 96
         self.height = 96
-        self.x = DISPLAY_X_PARAM # DISPLAY_X_PARAM + self.width
+        self.x = DISPLAY_X_PARAM  # DISPLAY_X_PARAM + self.width
         self.y = DISPLAY_Y_PARAM - self.height - 50
         self.walkCount = 0
         self.attackCount = 0
@@ -482,7 +558,8 @@ class Enemies(object):
                         display.blit(self.runRight[0], (self.x, self.y))
             # health bar
             pygame.draw.rect(display, (40, 40, 40), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50, 10))
-            pygame.draw.rect(display, (138, 3, 3), (self.hitbox[0] + 20, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
+            pygame.draw.rect(display, (138, 3, 3),
+                             (self.hitbox[0] + 20, self.hitbox[1] - 15, 50 - (5 * (10 - self.health)), 10))
             self.hitbox = (self.x + 3, self.y, 85, 96)
             # draw hitbox
             # pygame.draw.rect(display, (255, 255, 0), self.hitbox, 2)
@@ -560,9 +637,11 @@ class Enemies(object):
         enemySpawnReload = 1
         player.loot(self.xp)
 
+
 class arrow_class(object):
-    arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png")
-    arrowRightDirection = pygame.image.load(r"Images\Arrows\arrow_r.png")
+    arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png").convert_alpha()
+    arrowRightDirection = pygame.image.load(r"Images\Arrows\arrow_r.png").convert_alpha()
+
     def __init__(self, x, y, direction):
         self.x = x
         self.y = y
@@ -577,12 +656,14 @@ class arrow_class(object):
         middle_arrow_y = self.y + self.width // 2
         # проверка на встречу с объектом
         for ObjectOnMap in listObjectsOnMap:
-            if (ObjectOnMap.hitbox[0] < middle_arrow_x < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) and (ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] > middle_arrow_y > ObjectOnMap.hitbox[1]):
+            if (ObjectOnMap.hitbox[0] < middle_arrow_x < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) and (
+                    ObjectOnMap.hitbox[1] + ObjectOnMap.hitbox[3] > middle_arrow_y > ObjectOnMap.hitbox[1]):
                 arrowList.pop(arrowList.index(self))
                 return
         # проверка на встречу с зомби
         for zombie in zombies:
-            if middle_arrow_x > zombie.hitbox[0] and middle_arrow_x < zombie.hitbox[0] + zombie.hitbox[2] and middle_arrow_y > zombie.hitbox[1] and middle_arrow_y < zombie.hitbox[1] + zombie.hitbox[3]:
+            if middle_arrow_x > zombie.hitbox[0] and middle_arrow_x < zombie.hitbox[0] + zombie.hitbox[
+                2] and middle_arrow_y > zombie.hitbox[1] and middle_arrow_y < zombie.hitbox[1] + zombie.hitbox[3]:
                 # arrowHitSound.play()
                 zombie.hit(self.damage)
                 arrowList.pop(arrowList.index(self))
@@ -601,36 +682,46 @@ class arrow_class(object):
 
 
 class ObjectsOnMap(object):
-    StoneIMG = pygame.image.load(r"Images\Map\Objects\stone.jpg")
+    StoneIMG = pygame.image.load(r"Images\Map\Objects\stone.jpg").convert()
+
     def __init__(self, x, y, lengthx, lengthy):
+        # self.image = pygame.image.load(r"Images\Map\Objects\stone.jpg")
         self.x = x
         self.y = y
         self.lengthx = lengthx
         self.lengthy = lengthy
         self.hitbox = (self.x, self.y, self.lengthx, self.lengthy)
+        self.rect = (self.x, self.y, self.x+self.lengthx, self.y+self.lengthy)
 
+    def draw(self, display):
+        # display.blit(self.image, self.rect)
+        pass
 def drawObjectsOnMap(mapLevel):
     if mapLevel == 1:
         for ObjectOnMap in listObjectsOnMap:
-            # display.blit(ObjectsOnMap.StoneIMG, (ObjectOnMap.x, ObjectOnMap.y),BLEND_ADD)
-            pygame.draw.rect(display, (150, 150, 150), (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.lengthx, ObjectOnMap.lengthy))
+            # display.blit(ObjectsOnMap.StoneIMG, (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.x+ObjectOnMap.lengthx, ObjectOnMap.y+ObjectOnMap.lengthy))
+            # ObjectOnMap.draw(display)
+            pygame.draw.rect(display, (150, 150, 150),
+                             (ObjectOnMap.x, ObjectOnMap.y, ObjectOnMap.lengthx, ObjectOnMap.lengthy))
+            # pygame.blit()
+            # pygame.Surface.fill(ObjectsOnMap.StoneIMG)
 
 
 def draw_game_window():
     global run_main_while
     global mapLevel
     display.blit(background, (0, 0))  # draw background on display
-    # draw all zombies
 
-    # draw player on display
-    player.draw()
     # draw all arrows
     for arrow in arrowList:
         arrow.draw(display)
 
     drawObjectsOnMap(mapLevel)
+    # draw all zombies
     for zombie in zombies:
         zombie.draw(display)
+    # draw player on display
+    player.draw()
     if not (player.is_alive):
         fontDie = pygame.font.SysFont("arial", 60, True, True)
         textDie = fontDie.render("YOU DIED", True, (60, 0, 0))
@@ -642,6 +733,7 @@ def draw_game_window():
     draw_UI()
     pygame.display.update()
 
+
 def draw_UI():
     # backgroud UI
     # pygame.draw.rect(display, (0, 0, 0), (0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
@@ -649,9 +741,10 @@ def draw_UI():
     display.blit(player.heroHealth[player.health], (15, DISPLAY_Y_PARAM - 45))
     # xp bar
     pygame.draw.rect(display, (100, 100, 100), (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30), 5))
-    pygame.draw.rect(display, (255, 215, 0),(15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30) * float(player.xp / player.needed_xp), 5))
+    pygame.draw.rect(display, (255, 215, 0),
+                     (15, DISPLAY_Y_PARAM - 10, (DISPLAY_X_PARAM - 30) * float(player.xp / player.needed_xp), 5))
     # text Level 1...5
-    lvl = font.render("Level " + str(player.level), True, (255,215,0))
+    lvl = font.render("Level " + str(player.level), True, (255, 215, 0))
     display.blit(lvl, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM - 40))
     # count arrows which allowed
     if player.arrowsCount > 0:
@@ -662,18 +755,16 @@ def draw_UI():
                      (DISPLAY_X_PARAM - 85, DISPLAY_Y_PARAM - 38))
     display.blit(arrow_class.arrowRightDirection, (DISPLAY_X_PARAM - 65, DISPLAY_Y_PARAM - 30))
 
+
 listObjectsOnMap = []
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
-listObjectsOnMap.append(ObjectsOnMap(200, 400, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(200, 400, 150, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, 250, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, 200, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
-listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 350))
+listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 550))
 mapLevel = 1
-
-
-
 
 font = pygame.font.SysFont("arial", 20, True, True)
 run_main_while = True

@@ -1,6 +1,7 @@
 import random
 import pygame
-
+import math
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 DISPLAY_Y_PARAM = 800
 DISPLAY_X_PARAM = 1100
@@ -10,8 +11,10 @@ pygame.display.set_icon(pygame.image.load(r'Images\Map\Background\bg.jpg').conve
 background = pygame.image.load(r'Images\Map\Background\bg.jpg').convert()
 music = pygame.mixer.music.load(r"Sounds\Music\dungeon-master.mp3")
 
-
+# pygame.mixer.music.set_volume(0.15)
 # pygame.mixer.music.play(-1)
+# print(pygame.mixer.music.get_volume())
+
 
 class player_class(object):
     heroHealth = [pygame.image.load(r"Images\Hero\Health\health_0.png").convert_alpha(),
@@ -64,7 +67,7 @@ class player_class(object):
         self.width = self.s_width = 96
         self.height = self.s_height = 96
         # скорость
-        self.speed = self.s_speed = 5
+        self.speed = self.s_speed = 4
         # сила прыжка
         self.jump_power = self.s_jump_power = 10
         # хитбокс персонажа
@@ -125,7 +128,7 @@ class player_class(object):
                 elif self.leftDirection:
                     self.draw_run(display, self.heroSwordsManRunLeft)
         self.hitbox = (self.x+15, self.y, 55, 96)
-        pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
+        # pygame.draw.rect(display, (255, 0, 0), self.hitbox, 2)
 
     def draw_attackAnimation(self, display, heroAnimation):
         if self.attackCount + 1 >= 30:
@@ -171,15 +174,27 @@ class player_class(object):
                             self.is_attack_hit = True
                             self.whichZombieHit = zombie
 
-    def bow_attack(self):
+    def bow_attack(self, pos):
         global arrowsReload
         if self.arrowsCount != 0 and arrowsReload == 0:
             # arrowSound.play()
-            if self.rightDirection:
-                direction = 1
-            else:
-                direction = -1
-            arrowList.append(arrow_class(self.x + self.width // 2 - 15, self.y + self.height // 2 - 16, direction))
+            # the initial position is calculated relative to the player's position
+            x = self.x + self.width // 2 - 15
+            y = self.y + self.height // 2 - 16
+            # the difference between the cursor position and the starting point for calculating the angle
+            dx = pos[0] - x
+            dy = (pos[1] - y) * -1
+            length = (dx ** 2 + dy ** 2) ** 0.5
+            # cosine and sine of the angle
+            cos_angle = dx / length
+            sin_angle = dy / length
+            # angle in degrees
+            angle = math.degrees(math.acos(cos_angle))
+            # if the angle is in the lower quarters, then multiply by -1
+            if (dy < 0):
+                angle *= -1
+            # create arrow
+            arrowList.append(arrow_class(x, y, cos_angle, sin_angle, angle))
             arrowsReload += 1
             self.arrowsCount -= 1
 
@@ -413,14 +428,14 @@ class player_class(object):
                     self.jump_power = 0
                     self.jump_down()
                     return
-            if self.hitbox[1] - self.jump_power ** 2 // 2 < 0:  # другие условия удара можно добавить!
+            if self.hitbox[1] - self.jump_power ** 2 // 4 < 0:  # другие условия удара можно добавить!
                 self.y = 0  # типа стукнулся головой
                 self.jump_power = 0
                 self.jump_down()
                 return
             else:
-                self.y -= (self.jump_power ** 2) // 2
-                self.jump_power -= 1  # 1
+                self.y -= (self.jump_power ** 2) // 3
+                self.jump_power -= 0.75  # 1
         else:
             self.jump_down()
         # летит вниз
@@ -456,8 +471,8 @@ class player_class(object):
                 self.speed = self.s_speed
                 self.jump_power = self.s_jump_power
                 return
-        self.y += (self.jump_power ** 2) // 2
-        self.jump_power -= 1
+        self.y += (self.jump_power ** 2) // 3
+        self.jump_power -= 0.75
 
     def loot(self, xp):
         if self.level + 1 <= self.maxLevel:
@@ -641,19 +656,27 @@ class Enemies(object):
 class arrow_class(object):
     arrowLeftDirection = pygame.image.load(r"Images\Arrows\arrow_l.png").convert_alpha()
     arrowRightDirection = pygame.image.load(r"Images\Arrows\arrow_r.png").convert_alpha()
+    # arrowList.append(arrow_class(x, y, pos[0], pos[1]))
 
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y,cos_angle, sin_angle, angle):
         self.x = x
         self.y = y
-        self.direction = direction
-        self.speed = 10 * direction
+        self.cos_angle = cos_angle
+        self.sin_angle = sin_angle
+        self.angle = angle
+        self.speed = 10
         self.length = 50
         self.width = 8
-        self.damage = random.randint(4, 7)
+        self.damage = random.randint(6, 8)
 
     def draw(self, display):
-        middle_arrow_x = self.x + self.length // 2
-        middle_arrow_y = self.y + self.width // 2
+        middle_arrow_x = self.x + self.length // 2* self.cos_angle
+        middle_arrow_y = self.y + self.width // 2* self.sin_angle * -1
+
+
+
+
+
         # проверка на встречу с объектом
         for ObjectOnMap in listObjectsOnMap:
             if (ObjectOnMap.hitbox[0] < middle_arrow_x < ObjectOnMap.hitbox[0] + ObjectOnMap.hitbox[2]) and (
@@ -669,16 +692,20 @@ class arrow_class(object):
                 arrowList.pop(arrowList.index(self))
                 return
 
-        if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
-            self.x += self.speed
+        # if self.x + self.speed < DISPLAY_X_PARAM and self.x - self.speed > 0:
+        if self.x < DISPLAY_X_PARAM and self.x>0 and self.y>0 and self.y < DISPLAY_Y_PARAM:
+            self.x += self.speed * self.cos_angle
+            self.y += self.speed * self.sin_angle * -1
         else:
             # удаление объекта за экраном
             arrowList.pop(arrowList.index(self))
             return
-        if self.direction == 1:
-            display.blit(self.arrowRightDirection, (self.x, self.y))
-        else:
-            display.blit(self.arrowLeftDirection, (self.x, self.y))
+        display.blit(pygame.transform.rotate(self.arrowRightDirection, self.angle), (self.x, self.y))
+        # if self.direction == 1:
+        #     display.blit(self.arrowRightDirection, (self.x, self.y))
+        # else:
+        #    display.blit(self.arrowLeftDirection, (self.x, self.y))
+
 
 
 class ObjectsOnMap(object):
@@ -722,15 +749,24 @@ def draw_game_window():
         zombie.draw(display)
     # draw player on display
     player.draw()
+
+    # fontDie = pygame.font.SysFont("arial", 60, True, True)
+    # textDie = fontDie.render("YOU DIED", True, (160, 0, 0))
+    # posCenter = textDie.get_rect(center=(DISPLAY_X_PARAM / 2, DISPLAY_Y_PARAM / 2))
+    # display.blit(textDie, posCenter)
+
+
+
+    draw_UI()
     if not (player.is_alive):
+        display.fill((0,0,0))
         fontDie = pygame.font.SysFont("arial", 60, True, True)
-        textDie = fontDie.render("YOU DIED", True, (60, 0, 0))
-        display.blit(textDie, (DISPLAY_X_PARAM // 2 - 50, DISPLAY_Y_PARAM // 2))
+        textDie = fontDie.render("YOU DIED", True, (160, 0, 0))
+        posCenter = textDie.get_rect(center=(DISPLAY_X_PARAM/2, DISPLAY_Y_PARAM/2))
+        display.blit(textDie, posCenter)
         pygame.display.update()  # update display
         pygame.time.wait(3000)
         run_main_while = False
-
-    draw_UI()
     pygame.display.update()
 
 
@@ -777,6 +813,10 @@ swordReload = 0
 arrowsReload = 0
 enemySpawnReload = 0
 heroJumpReload = 0
+
+# enemySpawnReload = pygame.USEREVENT + 7
+# pygame.time.set_timer(enemySpawnReload,2000)
+
 # MAIN LOOP
 while run_main_while:
     clock.tick(60)  # 6(кол-во картинок) * n(делитель в методе draw) = 30
@@ -804,7 +844,14 @@ while run_main_while:
         # close game
         if event.type == pygame.QUIT:
             run_main_while = False
-    if len(zombies) < 2 and enemySpawnReload == 0:
+        elif event.type == pygame.MOUSEBUTTONDOWN and player.is_archer:
+            player.bow_attack(event.pos)
+        elif event.type == pygame.MOUSEBUTTONDOWN and player.is_swordsman:
+            player.sword_attack()
+
+        # elif event.type == pygame.USEREVENT + 7 and len(zombies) < 4:
+        #     zombies.append(Enemies())
+    if len(zombies) < 4 and enemySpawnReload == 0:
         zombies.append(Enemies())
         enemySpawnReload += 1
     # лист со всеми нажатами клавишами
@@ -815,11 +862,6 @@ while run_main_while:
     if keys[pygame.K_2]:
         player.is_archer = True
         player.is_swordsman = False
-    if keys[pygame.K_f]:
-        if player.is_archer:
-            player.bow_attack()
-        elif player.is_swordsman:
-            player.sword_attack()
     if keys[pygame.K_a] and player.x > 1:
         # бежит влево
         player.run_left()

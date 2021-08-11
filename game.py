@@ -366,7 +366,7 @@ class player_class(object):
 
     def pre_jump(self):
         self.is_jump = True
-        self.speed *= 1.5
+        self.speed *= 1.75
         self.is_run = False
         self.walkCount = 0
 
@@ -710,7 +710,6 @@ class arrow_class(object):
 
 class ObjectsOnMap(object):
     StoneIMG = pygame.image.load(r"Images\Map\Objects\stone.jpg").convert()
-
     def __init__(self, x, y, lengthx, lengthy):
         # self.image = pygame.image.load(r"Images\Map\Objects\stone.jpg")
         self.x = x
@@ -739,9 +738,7 @@ def draw_game_window():
     global mapLevel
     display.blit(background, (0, 0))  # draw background on display
 
-    # draw all arrows
-    for arrow in arrowList:
-        arrow.draw(display)
+
 
     drawObjectsOnMap(mapLevel)
     # draw all zombies
@@ -749,7 +746,9 @@ def draw_game_window():
         zombie.draw(display)
     # draw player on display
     player.draw()
-
+    # draw all arrows
+    for arrow in arrowList:
+        arrow.draw(display)
     # fontDie = pygame.font.SysFont("arial", 60, True, True)
     # textDie = fontDie.render("YOU DIED", True, (160, 0, 0))
     # posCenter = textDie.get_rect(center=(DISPLAY_X_PARAM / 2, DISPLAY_Y_PARAM / 2))
@@ -797,9 +796,11 @@ listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50, DISPLAY_X_PARAM, 5
 listObjectsOnMap.append(ObjectsOnMap(0, DISPLAY_Y_PARAM - 50 - 96 - 20 - 33, 200, 50))
 listObjectsOnMap.append(ObjectsOnMap(200, 400, 150, 50))
 listObjectsOnMap.append(ObjectsOnMap(0, 250, 200, 50))
-listObjectsOnMap.append(ObjectsOnMap(500, 200, 200, 50))
+listObjectsOnMap.append(ObjectsOnMap(300, 150, 300, 50))
 listObjectsOnMap.append(ObjectsOnMap(500, DISPLAY_Y_PARAM - 50 - 96 - 50 - 100, DISPLAY_X_PARAM - 500, 50))
-listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 550))
+listObjectsOnMap.append(ObjectsOnMap(800, 0, 50, 50))
+listObjectsOnMap.append(ObjectsOnMap(800, 200, 50, 100))
+listObjectsOnMap.append(ObjectsOnMap(1000, 300, 150, 50))
 mapLevel = 1
 
 font = pygame.font.SysFont("arial", 20, True, True)
